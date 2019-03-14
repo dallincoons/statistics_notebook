@@ -1,0 +1,92 @@
+---
+title: "The Olympics"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+**Week 2 Analysis**
+
+```{r, include=FALSE}
+library(mosaic)
+library(pander)
+library(tidyverse)
+library(DT) 
+Olympics <- read.csv("../Data/Olympics.csv", header=TRUE)
+```
+
+```{r, include = FALSE}
+# countryWinnersBySeasons <- function(country, season) {
+#   MedalWinnersBySeason <- Olympics %>% filter(Team == country, Season == season) %>% filter(Medal != 'NA') %>% nrow()
+#   TotalWinners <- Olympics %>% filter(Team == country, Season == season) %>% nrow()
+#   return(MedalWinnersBySeason / TotalWinners)
+# }
+
+# winningPercents <<- c()
+
+
+# winningPercentages <- function() {
+#   for (team in unique(Olympics$NOC)) {
+#     numberWinners <- Olympics %>% filter(NOC == team, Season == 'Summer') %>% filter(Medal != 'NA')
+#     if (numberWinners > 0){
+#     percent <- Olympics %>% filter(NOC == team, Season == 'Summer') %>% filter(Medal != 'NA') %>% nrow() / Olympics %>% filter(NOC == team, Season == 'Summer') %>% nrow()
+#       if (percent > 0.17) {
+#         print(team)
+#         print(percent)
+#       }
+#     }
+#   }
+# }
+# 
+# winningPercentages()
+
+# winningPercentage <- function(NOC) {
+#   percent <- Olympics %>% filter(NOC == NOC, Season == 'Winter') %>% filter(Medal != 'NA') %>% nrow() / Olympics %>% filter(NOC == NOC, Season == 'Winter') %>% nrow()
+#   return(percent)
+# }
+
+
+```
+
+I was curious about which countries historically do better in both the winter games and summer Olympic games, because I had the suspicion that some countries might do better than others depending on the season. My question is
+
+**Which countries have better winning percentages in the winter and summer Olympics?**
+
+<p>
+A winning percentage is the number of competitors who won a medal (gold, silver, or bronze) divided by the total number of competitors. For example if there were 100 competitors from the country Eastasia, and 40 of those competitors won a medal, the winning percentage for Eastasia would be 40 percent.
+
+Pictured below are the countries with the top four winning percentages across winter and summer Olympics, from 1896 to 2016.
+</p>
+
+<h3 style="color:#666666">USA is ranked fourth in overall Winter Olympics performance</h1>
+```{r}
+  winningPercentage <- function(country_code, season) {
+  percent <- (Olympics %>% filter(NOC == country_code, Season == season) %>% filter(Medal != 'NA') %>% nrow() / Olympics %>% filter(NOC == country_code, Season == season) %>% nrow())
+  return(percent * 100)
+  }
+
+  WinterTable <- data.frame(country = c("USA", "Netherlands", "Finland", "Norway"),  
+                         count = c(winningPercentage('USA', 'Winter'), winningPercentage('NED', 'Winter'), winningPercentage('FIN', 'Winter'), winningPercentage('NOR', 'Winter')),
+                         Countries = c("USA", "Netherlands", "Finland", "Norway"))
+  WinterTable %>%
+  ggplot(aes(x = reorder(country, count), y = count, fill = country)) + geom_bar(stat = "identity", color = "black") + labs(x = "Countries participating in Winter Olympics", y = "Winning Percentage") + scale_fill_manual("legend", values = c("USA" = "#732423", "Netherlands" = "#02A676", "Finland" = "#007369", "Norway" = "#008C72"))
+  
+``` 
+
+<h3 style="color:#666666">USA is ranked first in overall Summer Olympics performance</h1>
+```{r}
+  
+  SummerTable <- data.frame(country = c("USA", "China", "Norway", "Netherlands"),  
+                         count = c(winningPercentage('USA', 'Summer'), winningPercentage('NED', 'Summer'), winningPercentage('FIN', 'Summer'), winningPercentage('NOR', 'Summer')),
+                         Countries = c("USA", "Netherlands", "Finland", "Norway"))
+  SummerTable %>%
+  ggplot(aes(x = reorder(country, count), y = count, fill = country)) + geom_bar(stat = "identity", color = "black") + labs(x = "Countries participating in Summer Olympics", y = "Winning Percentage") + scale_fill_manual("legend", values = c("USA" = "#732423", "Netherlands" = "#02A676", "China" = "#007369", "Norway" = "#008C72"))
+```
+
+## Conclusion
+When calculating winning from a percentage basis, there's always the possibility that country with low turnout could more easily obtain a higher percent. For example, maybe 3 people showed up to the games and 2 won; that would be a whopping 66 win percentage. The countries shown in the charts have been participating in the Olympic games almost since it's inception and have had enough participants in the Olympics for us to safely rule that out as a concern.
+
+It appears that the United States does very well in the Summer Olympics on a percentage basis, but 3 other countries seem to do better in the Winter Olympics. We can't say for certain why that is from this analysis alone, but since two of the top performers are Nordic countries, we can speculate that their climate could have something to do with. It would certainly be interesting to study these trends more in depth.

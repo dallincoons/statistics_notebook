@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Table of Contents</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cerulean.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Math 325 Notebook</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Table of Contents</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Describing Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="GraphicalSummaries.html">Graphical Summaries</a>
+    </li>
+    <li>
+      <a href="NumericalSummaries.html">Numerical Summaries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Making Inference
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="MakingInference.html">Making Inference</a>
+    </li>
+    <li>
+      <a href="tTests.html">t Tests</a>
+    </li>
+    <li>
+      <a href="WilcoxonTests.html">Wilcoxon Tests</a>
+    </li>
+    <li>
+      <a href="ANOVA.html">Anova</a>
+    </li>
+    <li>
+      <a href="Kruskal.html">Kruskal-Wallis</a>
+    </li>
+    <li>
+      <a href="LinearRegression.html">Linear Regression</a>
+    </li>
+    <li>
+      <a href="LogisticRegression.html">Logistical Regression</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    R Help
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RCommands.html">R Commands</a>
+    </li>
+    <li>
+      <a href="RMarkdownHints.html">R Markdown Hints</a>
+    </li>
+    <li>
+      <a href="RCheatSheetsAndNotes.html">R Cheatsheets &amp; Notes</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Analyses
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="./Analyses/AnalysisRubric.html">Analysis Rubric</a>
+    </li>
+    <li>
+      <a href="./Analyses/StudentHousing.html">Good Example Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/StudentHousingPOOR.html">Poor Example Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/Stephanie.html">Stephanie Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/Olympics.html">Olympics Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/SleepPairedt.html">Sleep Paired</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Table of Contents</h1>
+
+</div>
+
+
+<p><br></p>
+<hr />
+<p>Customize this page and any of the Math 325 Notebook so that it becomes a useful <em>Guide to Statistical Analysis</em> for your <em>current</em> and <em>future</em> self.</p>
+<!-- This is how to comment text out. You can comment out the above instructions if you wish. Comments allow the text to remain in the Rmd file, but not be displayed in the html file. -->
+<p><a href="RMarkdownHints.html">Customization Help</a></p>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QuantY.png" width=35px;></p>
+</div>
+<div style="padding-left:125px;">
+<p><strong>1 Quantitative Variable</strong></p>
+<p>Quantatative variables are measured on a numeric scale. An example would be like height or weight. In addition to being numeric, it should make sense to perform arithmetic on this type of data. For example, a phone number is numeric but it wouldn’t make sense to take the mean of a list of phone numbers, so that’s an inidication you’re not dealing with quantative data.</p>
+<p>A <a href="GraphicalSummaries.html">histogram</a> is a good visualization tool for this type of data. Other examples are <a href="GraphicalSummaries.html">Boxplot, or Dotplot</a></p>
+<p>Good numerical summaries to use are <a href="NumericalSummaries.html">median, five-number summary</a></p>
+<p><a href="NumericalSummaries.html">Mean</a> and <a href="NumericalSummaries.html#standard-deviation">standard deviation</a> are great if this is normally distrubuted.</p>
+<p>Examples of tests that are a good match for this type of data are <a href="tTests.html">One Sample t Test</a> and <a href="WilcoxonTests.html">Signed-Rank Wilcoxon Test</a></p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QuantYQualXg2.png" width=59px;></p>
+</div>
+<div style="padding-left:125px;">
+<p><strong>1 Quantitative Variable | 2 Groups</strong></p>
+<p>Y is the data that we’re interested in learning more about</p>
+<p>X is the explanatory varable which gives greater context to Y</p>
+<p>For example, if we want to study how many chocolate bars people ate in a year according to gender, the number of chocolate bars would be the numeric variable we’re interested in, and the gender is the category or the variable that gives us more context.</p>
+<p><a href="GraphicalSummaries.html#Scatterplots">Scatterplots</a> or <a href="GraphicalSummaries.html#DotPlots">dot plots</a> could be good for this type of data.</p>
+<p>Examaple of a test you would use with this type of data is <a href="tTests.html">Independent samples t-test</a> or <a href="WilcoxonTests.html">Wilcoxon Rank Sum</a></p>
+<p>One of the most common tests with this type of data is the t-test, but it requires normal data or a large sample size, so if sample size is small and not normal, or if you’re working with ordered, quantatative data, a <a href="WilcoxonTests.html">Wilcoxon Rank Sum</a> test is an option to consider. A <a href="WilcoxonTests.html">Signed-Rank Wilcoxon Test</a> could also be used for paired data.</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QuantYQualXg3plus.png" width=59px;></p>
+</div>
+<div style="padding-left:125px;">
+<p><strong>1 Quantitative Variable | 3+ Groups</strong></p>
+<p>Like 2 group Quantitative Variable but with more groups</p>
+<p><a href="GraphicalSummaries.html">Box plot</a> is good for this type of data.</p>
+<p>Example of tests to use are <a href="ANOVA.html">Anova</a> or <a href="Kruskal.html">Kruskal-Wallis Rank Sum</a></p>
+<p>A Kruskal-Wallis Rank Sum is a good option to consider for ordered quantatative data and/or data that is not normal. Otherwise, for normal, qualatative data, Anova would be appropriate.</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QuantYQuantX.png" width=59px;></p>
+</div>
+<div style="padding-left:125px;">
+<!-- Add your customizations in the area below: -->
+<p><strong>2 Quantitative Variables</strong></p>
+<p>With this type of data, often we’re interested in discovering which quantatative variables have an effect on another quantatative variable. For example, if you wanted to find out how much taller a person is likely to be based on their shoe size, height and soe size would be X and Y. A test that can be used in this case could be a <a href="LinearRegression.html">Single Linear Regression</a>.</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QuantYMultX.png" width=110px;></p>
+</div>
+<div style="padding-left:125px;">
+<!-- Add your customizations in the area below: -->
+<p><strong>1 Quantitative Response | Multiple Explanatory Variables</strong></p>
+<p>This would involve a response variable with 2 or more explanatory variables. Building on the example from the 2 Quantative Variables section, this could involve including weight as well as shoe size to predict a persons height. <a href="LinearRegression.html">Multiple Regression</a> is a test that can be used with this type of data.</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/BinomYQuantX.png" width=59px;></p>
+</div>
+<div style="padding-left:125px;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Binomial Response | 1 Explanatory Variable</strong></p>
+<p>X is the explanatory variable, Y is the response, so that we’re predicting where Y will be in relation to 1 or 0 depending on where X is. For example, if we want to predict whether an O-ring will fail or not based on the temperature, this would be a binary response - either it fails or it doesn’t.</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/BinomYMultX.png" width=110px;></p>
+</div>
+<div style="padding-left:125px;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Binomial Response | Multiple Explanatory Variables</strong></p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div style="float:left;width:125px;" align="center">
+<p><img src="Images/QualYQualX.png" width=59px;></p>
+</div>
+<div style="padding-left:125px;">
+<!-- Add your customizations in the area below: -->
+<p><strong>2 Qualitative Variables</strong></p>
+<p>library(mosaic)</p>
+<p>library(tidyverse)</p>
+<p>View(KidsFeet)</p>
+<p>KidsFeet %&gt;%</p>
+<p>group_by(sex) %&gt;%</p>
+<p>summarise(min=min(length), Q1=quantile(length, 0.25), median=median(length), Q3=quantile(length, 0.75), max=max(length))</p>
+<p>boxplot(length ~ sex, data=KidsFeet)</p>
+<p>table(KidsFeet$sex)</p>
+<p>barplot(table(KidsFeet$sex))</p>
+<p>KidsFeet %&gt;%</p>
+<p>summarise(cor(width, length))</p>
+<p>plot(length ~ width, data=KidsFeet)</p>
+<!------------------------------------------------>
+</div>
+<div style="clear:both;">
+
+</div>
+<hr />
+<footer>
+</footer>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

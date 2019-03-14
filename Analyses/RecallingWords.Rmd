@@ -1,0 +1,154 @@
+---
+title: "Recalling Words"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+<script type="text/javascript">
+ function showhide(id) {
+    var e = document.getElementById(id);
+    e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+ }
+</script>
+
+```{r, include=FALSE}
+library(mosaic)
+library(car)
+library(pander)
+library(DT) #You may need to run: install.packages("DT") 
+library(ggplot2)
+```
+
+```{r, eval=FALSE}
+# Play the chunk above and this one to get the data into your Console
+View(Friendly)
+?Friendly
+```
+
+
+<br />
+
+#### Background
+
+Many teachers and other educators are interested in understanding how to best deliver new content to students. In general, they have two choices of how to do this.
+
+1. The Meshed Approach
+    * Deliver new content while simultaneously reviewing previously understood content.
+
+2. The Before Approach
+    * Deliver new content after fully reviewing previously understood content.
+
+A study was performed to determine whether the *Meshed* or *Before* approaches to delivering content had any positive benefits on memory recall. 
+
+<div style="padding-left:15px;">
+
+##### <a href="javascript:showhide('uniquename')">The Experiment <span style="font-size:8pt;">(click to view)</span></a>
+
+
+<div id="uniquename" style="display:none;">
+
+Individuals were seated at a computer and shown a list of words. Words appeared on the screen one at a time, for two seconds each, until all words had been shown (40 total). After all words were shown, they were required to perform a few two-digit mathematical additions (like 15 + 25) for 15 seconds to avoid immediate memory recall of the words. They were then asked to write down as many of the 40 words as they could remember. They were given a maximum of 5.3 minutes to recall words.
+
+The process of showing words and recalling words was repeated four times with the same list of words each time (four chances to get it right). The presentation of the first trial was the same for all treatment conditions. However, trials 2, 3, and 4 were slightly different for each treatment condition.
+
+<div style="padding-left:15px;">
+
+The `SFR` group (the control group) stands for Standard Free Recall. In all four trials the same list of 40 words was presented, in a random order each time.
+
+The `Before` group also used the same 40 words during each trial. However, any words that were correctly recalled in a previous trial were presented first, or *before* the words that were not recalled in the last trial. After all the correct words were presented in random order, the non-recalled words were presented in a random order.
+
+The `Meshed` group also used the same 40 words during each trial. However, words that were correctly recalled in a previous trial were alternated with a missed word during the next presentation order. 
+
+</div>
+
+The data records the number of correctly recalled words (out of the 40 possible) from the fourth trial. Results were obtained for 30 students, 10 in each of the three treatment groups: `SFR`, `Before`, and `Meshed`. 
+
+</div>
+
+##### <a href="javascript:showhide('uniquename2')">The Data <span style="font-size:8pt;">(click to view)</span></a>
+
+<div id="uniquename2" style="display:none;">
+
+```{r}
+datatable(Friendly)
+```
+
+</div>
+</div>
+
+<br />
+
+
+```{r, message=FALSE, warning=FALSE}
+SFR <- Friendly %>% filter(condition == 'SFR')
+Before <- Friendly %>% filter(condition == 'Before')
+Meshed <- Friendly %>% filter(condition == 'Meshed')
+```
+
+I would like to study whether each experiement produced results that would indicate an improvement in memory recall, because I want to know if either the Before method or the Meshed method are worth implementing at all. If they are worth implementing, I want to pit the two experimentation methods head to head to determine whether there is any statistical difference between the two.
+
+$$
+ H_0: \text{Difference in medians} = 0
+$$
+$$
+H_a: \text{Difference in medians} \not= 0
+$$
+
+
+From a boxplot of the data we can see that both Before and Meshed had significantly better performance than the control group (SFR). Although there were some geniuses in the SFR group who seemed to recall most of the words, the range was much larger than the experimentation groups, which indicates that people in that treatment condition had very inconsistent performance. It seems as though the Before group has the tightest range and therefore could be considered more consistent, though it could possibly have more outliers, but it's hard to say for sure because of the small sample size.
+
+```{r, message=FALSE, warning=FALSE}
+
+ggplot(Friendly, aes(x=factor(condition), y=correct)) + geom_boxplot(fill="LightSalmon") + labs(x="Learning method", y="Number of Correct Answers (out od 40)", title="Both experimentation learning methods have higher means than control group") + theme(
+  panel.background = element_rect(fill = "Ivory",
+                                colour = "Ivory",
+                                size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                colour = "white"))
+```
+
+```{r}
+summary <- Friendly %>% 
+  group_by(condition) %>% 
+  summarise(
+      Mean = mean(correct), 
+      Median = median(correct), 
+      'Standard Deviation' = sd(correct),
+      'Sample Size' = n()
+  )
+pander(summary)
+```
+
+I first compared the control group with both the Meshed group and the Before group using Wilcoxon Rank Sum test because we're dealing with independent samples. Note that even though we have the sample sample size between all three groups, it's not considered paired data, because the people in one group didn't determine who was in another group.
+
+When we use the Wilcoxon Rank Sum test, we're comparing the median of the difference between two groups. When we compare SFR with the Before and Meshed groups, the large p values (~0.98 and ~0.96 respecitively) show that neither group is stochastically larger than the control group.
+
+I'll be using a level of significance of $\alpha = .25$ for both tests.
+
+```{r, warning=FALSE}
+
+pander(wilcox.test(SFR$correct, Meshed$correct, mu = 0, alternative = 'less', conf.level=.975))
+pander(wilcox.test(SFR$correct, Before$correct, mu = 0, alternative = 'less', conf.level=.975))
+```
+
+When we compare Meshed with Before using a signifance level of $\alpha = .05$ we get a p-value of .0575 so we can say that there isn't a statistically significant difference between the two approaches.
+
+```{r, warning=FALSE}
+pander(wilcox.test(Before$correct, Meshed$correct, mu = 0, alternative = 'two.sided', conf.level=.95))
+
+```
+
+However, the Before test has a p-value of .02278 which is less than .025 so we can say it is significant.
+
+We can conclude that people who reviewed information using either the Before method or the Meshed method perform significantly better than not reviewing the information at all. Further it seems as though we can't conclude with this experiment that there is a big enough difference between both experimentation methods that it could be considered significant. 
+
+
+
+
+
+
+

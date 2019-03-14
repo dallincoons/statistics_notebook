@@ -1,0 +1,117 @@
+---
+title: "Take a sad song and make it better"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+<br>
+
+## Background
+In a previous analsys, I tested whether more positive or happy Ramones songs tend to be more popular, and found that there did seem to be a correlation such that the mofe positive the song, the more popular it tended to be.
+
+I thought I would compare it against The Beatles to see if the same type of correlation holds true. I would like to see if valence has a meaningful relationship to popularity for the Beatles and the Ramones, and whether or not that relationship differs significantly between the two.
+
+I will again be using analytics from Spotify because it's widely used and should provide a reasonably reliable measure of popularity. I will be also be using an attribute that Spotify [terms "valence"](https://developer.spotify.com/documentation/web-api/reference/tracks/get-several-audio-features/) as "the musical positiveness conveyed". Put another way, it measures how happy a song is. Both popularity and valence are rated by Spotify on a scale of 1 to 10.
+
+I used the [Spotify API](https://developer.spotify.com/documentation/web-api/reference/tracks/get-track/) to gather audio analytics about every Ramones song on each of their 14 studio albums, as well as the 13 studio albums by the Beatles.
+
+## Model and Hypothesis
+
+$$
+  \underbrace{Y_i}_{\text{Popularity}} = \overbrace{\overbrace{\beta_0}^{\text{Y-int.}}  +    \underbrace{\beta_1}_{\text{Slope}} \overbrace{X_{i1}}^{\text{Valence}}}^{\text{Ramones}} + \overbrace{\underbrace{\beta_2}_{\text{Y-int. change}} \overbrace{X_{i2}}^{\text{1 if Beatles}} + \underbrace{\beta_3}_{\text{change in slope}} \overbrace{X_{i1} X_{i2}}^{\text{Interaction}}}^{\text{The Beatles}} + \epsilon_i
+$$
+
+The two bands are going to be the explanatory variables, so for modeling the Ramones, $X_{i2}$ would be zero giving us the model $Y_i = \beta_0 + \beta_1 X_{i2} + \epsilon_i$ after canceling out $\beta_2$ and $\beta_3$.
+
+For modeling the Beatles, $X_{i2}$ equals 1 which gives us the model $Y_i = (\beta_0 + \beta_2) + (\beta_1 + \beta_3) X_{i2} + \epsilon_i$. The goal of this model is to determine the change in the y intercept from the earlier base (Ramones) hence $(\beta_0 + \beta_2)$. The change in slope is shown in the model as $(\beta_1 + \beta_3)$.
+
+We want to check if there there is a significant change in both slope when comparing the Beatles against the Ramones, shown as follows:
+
+$$
+  H_0 : \beta_3 = 0
+$$
+$$
+  H_a : \beta_3 \not= 0
+$$
+We'll also test whether there is a difference between popularity when valence is zero. This is shown as:
+
+$$
+  H_0 : \beta_2 = 0
+$$
+$$
+  H_a : \beta_2 \not= 0
+$$
+
+<hr>
+
+<center>
+$\alpha = 0.05$
+</center>
+
+```{r, include=FALSE}
+
+library(ggplot2)
+library(car)
+library(tidyverse)
+library(pander)
+
+bands <- read.csv("../Data/ramones_and_beatles.csv", header=TRUE)
+
+```
+
+
+```{r}
+bandslm <- lm(pop ~ valence + artist + valence:artist, data=bands)
+
+pander(bandslm)
+```
+
+The second row of the linear regression test shows the value for the $\beta_1$ coefficient which shows that for every one point increase of valence in a Ramones song, we should see on average a .1373 increase in popularity.
+
+The fourth row (valence:artistThe Beatles) indicates the difference in the slope of The Beatles regression line from the Ramones ($\beta_3$), and the p=value $(p = 3.217\times10^{-05})$ indicates the Beatles have a negative slope in relation. This tells us that The Beatles gain popularity at a significantly slower rate than the Ramones, and in fact seem to be losing popularity as evidenced when the two slopes are added together (.1373 + (-.1824) = -.0451).
+
+The first row shows the popularity when Ramones music has a valence of zero, and the third row shows the difference in popularity when The Beatles music has zero valence. The p-value is highly significant $(p = 1.485\times10^{-40})$. It seems that The Beatles unequivocally start off in a vastly better position popularity-wise.
+
+
+```{r}
+# plot(po ~ valence + artist + valence:artist, data=bands, pch=16)
+# abline(13p.26233, .13729, col="gray55")
+
+ggplot(bands, aes(x = valence, y = pop, color = factor(artist))) + 
+geom_point() +
+labs(x="Valence", y="Popularity", title="Ramones songs benefit more from positive vibes than Beatles songs", color = "Artist") +
+geom_abline(aes(intercept=13.26233, slope=.13729, color="Ramones")) +
+geom_abline(aes(intercept=59.48, slope=-.0451, color="The Beatles")) +
+theme_bw()
+```
+
+## Interpretation
+
+For some reason it seems as though the Ramones benefit from having positive vibes in their music, while the Beatle's popularity suffers slightly for it.
+
+It's hard to say why this is, but some possibilities could be that The Beatles are more skilled at writing more somber music, or there could be a correlation with people who are generally interested in a particular genre and what type of songs they prefer. It could also have to do with time period, given the Ramones originated in the United States in the late 1970's, and the Beatles started in the UK in the early 1960's. It might be useful to analyze music from similar time periods and locations to see if there are any trends.plot(height ~ age, data=Loblolly)
+
+
+### Caveats
+
+There are a couple things to keep in mind about the results of this data. First, the attributes sampled were from one music medium out of many, and it's always possible that the data is derived from an disproportionate amount of young hip techno-wizards, leaving out Uncle Bob and Hipster Mac who listen to vinyl records. We also don't know the specifics of how Spotify measure popularity or valence.
+
+In regards to the appropriateness check it looks like we have a bit of skew in the data, looking at the Q-Q plot. The Residual vs Fitted plot is  it looks like it has roughly constant variance, and linearity seems reasonable judging from the horizontal line. There is one obvious outlier, possibly a few outliers, that might be affecting the linear regression. The Residual vs Order plot looks sufficiently random, however. Overall, I'd still deem the analysis informative, but it's good to keep in mind that there are some potential issues with the data.
+
+
+```{r,  results = FALSE}
+par(mfrow=c(1,3))
+plot(bandslm, which=1)
+qqPlot(bandslm$residuals,
+ ylab = "Standardised Residuals",
+ xlab = "Theoretical Quantiles")
+title("Normal Q-Q", line = .5,
+ cex.main = 1.5, font.main = 1)
+plot(bandslm$residuals,
+ ylab = "Residuals")
+title("Residuals vs Order", line = .5,
+ cex.main = 1.5, font.main = 1)
+```
+

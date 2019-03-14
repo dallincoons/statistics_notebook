@@ -1,0 +1,122 @@
+---
+title: "Chocolate"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+# Be sure to use your file menus at the top of R-Studio to:
+# "Session -> Set working directory -> To source file location"
+# Then play this chunk and the next one to get the data into R.
+library(mosaic)
+library(car)
+library(DT)
+library(pander)
+library(readr)
+choc <- read_csv("../Data/Chocolate.csv")
+choc <- choc %>% mutate(Cacoa_numeric = as.numeric(gsub('%', "", Cocao)))
+```
+
+<!-- Instructions:
+
+ Use the Chocolate dataset and a Kruskal-Wallis Test(s) to answer an interesting question(s) that you come up with.
+ 
+ About the dataset:
+ 
+  * Company: Name of the company manufacturing the bar.
+
+  * Orig: The specific geo-region of origin for the bar.
+
+  * Review: Date of publication of the review.
+
+  * Cocoa: Cocoa percentage (darkness) of the chocolate bar being reviewed.
+
+  * Location: Manufacturer base country.
+
+  * Rating: Expert rating for the bar.
+      5= Elite (Transcending beyond the ordinary limits)
+      4= Premium (Superior flavor development, character and style)
+      3= Satisfactory(3.0) to praiseworthy(3.75) (well made with special qualities)
+      2= Disappointing (Passable but contains at least one significant flaw)
+      1= Unpleasant (mostly unpalatable)
+
+   * Type: The variety (breed) of cocoa bean used, if provided.
+   
+   * BroadOrig: The broad geo-region of origin for the bean.
+
+Note this dataset and description come from: © 2018 Kaggle Inc for further details visit:
+
+[Kaggle.com](https://www.kaggle.com/rtatman/chocolate-bar-ratings/data)
+
+
+If you want to give your critiquers some ideas about what you have questions on and would like help with, place those details here.-->
+
+
+<!--End your comments to your critiquers before this line.-->
+
+----
+
+<!--Begin writing your Analysis after this point.-->
+
+## Question and Hypothesis
+
+Chocolate is rated by someone who knows a lot about chocolate on a scale from 1 to 5:
+    
+     
+      5 = Elite (Transcending beyond the ordinary limits)
+      4 = Premium (Superior flavor development, character and style)
+      3 = Satisfactory(3.0) to praiseworthy(3.75) (well made with special qualities)
+      2 = Disappointing (Passable but contains at least one significant flaw)
+      1 = Unpleasant (mostly unpalatable)
+
+My question for this analysis is:
+Do ratings differ significantly from the years 2006 to 2017?
+
+I will a Kruskal-Wallis Rank Sum test with the following formal definition of my hypothesis:
+$$
+  H_0: \text{all samples are from the same distribution}
+$$
+$$
+  H_a: \text{at least one sample is stochastically different}
+$$
+
+I'm a level of significance of .05 kind of guy, so for this analysis the level of significance will be .05
+
+Informally, what we are testing for is that at least one years worth of reviews differs from any of the others in a significant way. For example, maybe 2010 was a year where chocolate across the board recieved rave reviews, while the other years were only so-so. We'd have to run a statistical test to be sure, but it's very possible that we would find that our p-value is below .05, meaning there is indeed a significant difference.
+
+At a basic level, for a Kruskal-Wallis test, we will "rank" each chocolate rating, and run it through a function to see if the rankings of each group (which in this case the year of the review) are similar or not.
+```{r}
+pander(kruskal.test(Review ~ Rating, data = choc))
+```
+
+## 
+
+After running a Kruskal-Wallis rank sum test, which shows a p-value significantly lower than our level of significance, it seems as though there are indeed at least one year in which the ratings differed significantly from the other years. 
+
+To explore the data further, let's look at some numbers. I think the most useful number to look at here is the "min" which stands for the minimum ratings and the "mean" column which is essentially the averge:
+
+```{r}
+pander(favstats(Rating ~ Review, data = choc))
+```
+
+If you look closely, you might start to see a trend. The minimum ratings for each year either stay the same or increase from one year to the next. If a big table of numbers isn't your thing, here's a visual:
+
+
+```{r}
+ggplot(choc, aes(x=factor(Review), y=Rating)) + geom_boxplot(fill="skyblue", color="black") + labs(title="Chocolate ratings became more consistent from 2006 to 2017", x="Years", y="Ratings")
+```
+
+## Interpretation
+From the above chart it seems that ranges tighten each year from 2006 and by the time 2017 rolls around, chocolate ratings are quite consistent, hovering around the 3.5 to 4 range. 
+
+One interpretation is both that chocolate has been becoming more consistent in it's quality and chocolate quality has been generally increasing. Another way to look at it is that the reviewers could be simply becoming more consistent themselves on how they rate chocolate. It may be that over time, some have changed how they judge chocolate, or they agreed on a consistent standard. It could be that there are simply less reviewers making it easier to be consistent. We can't necessarily conclude that chocolate has been getting tastier over the past decade, although it's a possiblity judging from our Kruskal-Wallis test. I would recommend learning more about the review process as a start in gaining additional insight.
+
+
+
+
+
+
+
+

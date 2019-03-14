@@ -1,0 +1,129 @@
+---
+title: "Simple Linear Regression"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+# Load your libraries
+library(car)
+library(tidyverse)
+library(pander)
+
+ramones_raw <- read.csv("../Data/ramones.csv")
+
+ramones <- ramones_raw %>% mutate(song_length_minutes = song_length_minute + (song_length_second) * (1/60))
+
+# Load your data after saving a csv file in your Data folder.
+# You can use either 
+#   someName <- read.csv("../Data/YourDataFileName.csv", header=TRUE)
+# or
+#   library(readr)
+#   someName <- read_csv("../Data/YourDataFileName.csv")
+
+# Don't forget to run "Session -> Set Working Directory -> To Source file location"
+
+```
+
+
+<!-- Directions
+
+Come up with a simple linear regression of your own creation. 
+
+* Write the Background and clearly state your question. Then collect data and perform the linear regression analysis in order to answer your question. Use the proper order of first, ask the question, then second, figure out the answer.
+
+* You should collect both the quantitative response variable and the quantitative explanatory variable yourself. This can be data you collect from 
+    - the internet (like weather data, Facebook data, or sports data) 
+    - your own experiment 
+    - your own observational study
+* However,     
+    - The data should not be a single pre-existing dataset. It must be something that you piece together yourself.
+
+* You need at least $n=3$ $(X,Y)$ pairs to perform the regression. However, your regression will only be useful if you can get around $n=10$ or more observations.
+
+-->
+
+
+## Background
+The Ramones were an American punk rock band from 1974 to 1996 with 14 studio albums. They were severely underrated during their time, and it was until after their disbandment that they started to become recognized for their impact on rock music. 
+
+While the Ramones didn't get much airplay, and didn't show up on the charts very often, today we have many different mediums to help us gain a better understanding of the attributes and trends of the music we listen to.
+
+Spotify is one of the most popular music streaming services, and they happen to provide several metrics and attributes of the music they host on their platform. Two of these attributes which will be the focus of this analysis are 'popularity' and 'valence'. Both of these attributes are rated on a scale of 1 to 10. Popularity is self-exaplanatory but valence could use a definition. Spotify [defines valence](https://developer.spotify.com/documentation/web-api/reference/tracks/get-several-audio-features/) as "the musical positiveness conveyed". Put another way, it measures how happy a song is.
+
+I would like to see if valence has a meaningful relationship to popularity, in other words, <b>do happier ramones songs tend to be more popular (or less popular)?</b> 
+
+## Method
+
+I used the [Spotify API](https://developer.spotify.com/documentation/web-api/reference/tracks/get-track/) to gather audio analytics about every Ramones song on each of their 14 studio albums. 
+
+I will be using regression analysis to study the correlation between these attributes. As part of the analysis, I wish to discover for every point of valence, how many more points of popularity increase or decrease we can expect to see on average.
+
+## Hypothesis
+
+In order to test our hypothesis, we will use a linear regression model:
+
+$$
+  \underbrace{Y_i}_\text{Popularity} = \beta_0 + \beta_1 \underbrace{X_i}_\text{Valence} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0, \sigma^2)
+$$
+We will assume that there is no meaningful relationship, until proven otherwise. This will be our null hypothesis.
+
+$$
+  H_0: \beta_1 = 0
+$$
+If we find compelling evidence to prove some kind of relationship we will reject the previous assumption. This will be our alternative hypothesis:
+
+$$
+  H_a: \beta_1 \neq 0
+$$
+Significance will be determined at:
+
+$$
+  \alpha = 0.05
+$$
+
+## Analysis
+
+Our linear regression model is as follows:
+$$
+  \underbrace{\hat{Y}_i}_\text{Popularity} = 12.63 + .1363 \underbrace{X_i}_\text{Valence.}
+$$
+
+Which can be represented by the following plot:
+```{r}
+ramoneslm <- lm(pop ~ valence, data=ramones)
+
+
+plot(pop ~ valence, data=ramones, main="Positive Ramones songs tend to be more popular", xlab="Valence", ylab="Popularity", bg="steelblue", col="gray", pch=21, las=1)
+abline(ramoneslm, lwd=3, col=rgb(.4,.4,.4,.2))
+abline(v=seq(40,120,20), h=seq(40,120,20), lty=2, col=rgb(.6,.6,.6,.2))
+```
+
+```{r}
+pander(summary(ramoneslm))
+```
+
+
+This suggests that there is a positive correlation, though whether it's significant remains to be seen. 
+
+The estimated value of the slope is .1363. This means on average for every one point increase in valence, we can expect to see an increase in popularity of .1363.
+
+One thing to note is that the square of correlation ($R^2$) is very low, which means that there is a lot of variation that is not explained by this model.
+
+That being said, the regression test gives us a p-value less than .05 (.0001063), indicating to reject the null hypothesis, which means there is sufficient evidence to suggest that there is a meaningful relationship.
+
+## Appropriateness of the Regression Analysis
+
+There are some concerning aspects of this dataset. The check for appropriateness yields some less than desirable results. In the first chart you can see the variance decreases as the x value increases, which means this data doesn't pass the constant variance check. The Q-Q plot veers off course towards the top, indicating some issues with skew in the data. This means the p-value arrived at in this analysis may not be wholly reliable.
+
+```{r}
+par(mfrow=c(1,3))
+plot(ramoneslm, which=1:2)
+```
+
+## Interpretation
+
+From the analysis, it appears that the more popular Ramones songs are the more positive, happier ones. However, it seems as though Ramones songs suffer in general with popularity, which may be the cause of the data issues mentioned earlier. It would be interesting to measure this correlation across a wider spectrum of music, such as todays top hits to see if popular songs tend to be the happier ones. 
+

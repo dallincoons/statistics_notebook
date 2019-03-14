@@ -1,0 +1,82 @@
+---
+title: "Stephanie's Housing Request"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+**Week 1 Analysis**
+
+```{r, include=FALSE}
+library(ggplot2)
+library(plotly)
+library(ggrepel)
+library(mosaic)
+library(tidyverse)
+library(pander)
+library(DT) # If you get an error stating: 
+            # Error in library(DT): there is no package called 'DT'
+            # You will need to run: install.packages("DT") 
+            # in your Console, then try "Knit HTML" again.
+Rent <- read.csv("../Data/Rent.csv", header=TRUE)
+```
+
+<br />
+
+## Background
+
+Stephanie is a student that will be starting school at BYU-Idaho next semester. Suppose she sent you the following email.
+
+----
+
+"Hi. My name is Stephanie. I would like to learn about what housing options I have for living at BYU-Idaho next semester. It will be my first semester there, so I would like to find something that is close to campus and around $300 a month in rent. I'm not too picky on roomates, but I would like somewhere that has a lot of people around so I can get to know as many people as possible. Thanks in advance!"
+
+----
+
+Write your response to Stephanie below. Use the "Rent" dataset, good statistical analysis, and clear writing to make some well supported suggestions to her about apartments that meet her stated criterions. You are free to use other criterion that you think she might find more meaningful as well.
+
+## Response
+
+Based on what you told me it seems that the criteria you're looking for is something that's cheap and close to campus, and having a lot of people around is a big bonus.
+
+Here's a summary of the overall prices of female housing. The median price (1125) is within in your budget if divide it by 4 (about 281 a month). That means at least half of the apartments available should be affordable, which gives you plenty of options.
+
+```{r}
+RentF <- filter(Rent, Gender == "F")
+
+summary(RentF$Price) %>% pander()
+```
+
+Another criteria we can look at to narrow down the search is walking distance to campus.
+
+I included a scatterplot of walking distance and the price for each apartment in which I was looking for apartments that have walking distances of 4 minutes or less and have per-month-rents within your budget. 
+
+You'll notice that the cheapest options and the apartments with the shortest walking distances are on the bottom left of the graph. The three that stand out, which are marked in red, that I would recommend looking into first are Normandy Apartments, Bayside Manor, and Birch Plaza.
+
+
+```{r, warning=FALSE}
+y_limits <- c(1500, NA)
+
+
+plot <- ggplot(RentF, aes(x=Price, y=WalkingMinutes, label = Apartment)) + 
+  labs(x="Price Per Semester") +
+  geom_point(color = ifelse(RentF$Price < 1000 & RentF$WalkingMinutes < 4, "red", "gray")) + 
+  geom_label_repel(data = subset(RentF, Price < 1000 & WalkingMinutes < 4,
+                  direction     = "x",
+                  segment.size  = 0.01,
+                  ylim = y_limits,
+                  segment.color = "red"
+                )) 
+
+ggplotly(plot)
+```
+
+Since you mentioned you want to be around people, you might be interested in the capacity of the apartment complexes.
+
+Of the three I recommended previously, Birch Plaza has the highest capacity of 343 which would put it into the
+89th percentile, which means of all the candidate apartment complexes, 89 percent have smaller capacities. Bayside's capacity is at the 8th percentile, which puts it on the lower end of the range, while Normandy is almost in the middle of the range at the 40th percentile.
+
+Hope some of that helps. Happy apartment hunting!

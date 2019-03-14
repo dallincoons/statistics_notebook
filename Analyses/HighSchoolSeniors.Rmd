@@ -1,0 +1,121 @@
+---
+title: "High School Seniors t Test"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(DT)
+library(pander)
+library(readr)
+library(mosaic)
+library(car)
+
+HSS <- read_csv("../data/HighSchoolSeniors.csv")
+```
+
+## Background
+
+High School students across the United States submitted surveys that included questions about strongly the participants felt about the importantance of various topics. The students gave ratings from 0 to 1000 to indicate the strength of their opinion, with 0 meaning they didn't care at all and 1000 meaning they have maximum caring capacity. The purpose of this analyis is to see if gender plays a role in the students ratings, or in other words, does one gender have higher ratings on average than the other?
+
+## Method
+
+There were six categories which will be the focus of this analysis: 
+
+* Importance of reducing pollution
+
+* Importance of recycling rubbish
+
+* Importance of conserving water 
+
+* Importance of saving energy 
+
+* Importance of owning a computer 
+
+* Importance of internet access 
+
+Because these ratings were all on the same scale of 0-1000, and the purpose is to only measure opinion strength according to gender, I chose to combine all six ratings for each gender, and take the mean of each combined value.
+
+For example, if female Student A had a rating of 300, 500, 700, 900, and 1000, the combined rating would be 3400 and the mean would be 680. I would then do the same with Student B, and doing this for every student gives me a collection of means for each gender that can be used for a t-test.
+
+Since there's no common knowledge to suggest whether male or female opinon strength would be greater, this analysis will use a two sided t-test.
+
+The null and alternative hypotheses for this study are:
+$$
+  H_0: \mu_\text{Opinion strength of male students} - \mu_\text{Opinion strength of female students} = 0
+$$
+$$
+  H_a: \mu_\text{Opinion strength of male students} - \mu_\text{Opinion strength of female students} \neq 0
+$$
+
+This means that we're going to assume that there is no difference between genders in terms of opinion strength. If we recieve sufficient evidence that there is a difference, we will reject the null hypothesis, which would suggest that one gender generally has higher scores. 
+
+The Q-Q plots for male and females both go out of the normal range, with a very heavy-tailed distribution. Although that's cause for concern, the sample size of each gender is large enough (101 for each) that we'll go ahead with the analysis, but this is good to keep in mind.
+
+Note: The survey only allowed for a maximum rating of 1000, but there were a few students who either unwittingly or purposely didn't follow directions, and so there were erroneous scores above 1000. Any outliers like this with invalid scores were removed from the dataset for this analysis.
+
+```{r, include=FALSE, warning=FALSE}
+
+ValidRatings <- HSS %>% filter(Importance_Internet_access < 1000 & Importance_reducing_pollution < 1000 & Importance_recycling_rubbish < 1000 & Importance_conserving_water < 1000) %>% filter(!is.na(Importance_Internet_access) & !is.na(Importance_reducing_pollution) & !is.na(Importance_recycling_rubbish) & !is.na(Importance_conserving_water) & !is.na(Importance_conserving_water)) %>% filter(!is.na(Gender)) 
+
+ValidRating <- ValidRatings %>% mutate(combined_opinion_mean = (Importance_conserving_water + Importance_Internet_access + Importance_recycling_rubbish + Importance_reducing_pollution + Importance_saving_energy)/6)
+
+MaleValidRatings <- HSS %>% filter(Importance_Internet_access < 1000 & Importance_reducing_pollution < 1000 & Importance_recycling_rubbish < 1000 & Importance_conserving_water < 1000) %>% filter(Gender == 'Male') %>% filter(!is.na(Importance_Internet_access))
+
+FemaleValidRatings <- HSS %>% filter(Importance_Internet_access < 1000 & Importance_reducing_pollution < 1000 & Importance_recycling_rubbish < 1000 & Importance_conserving_water < 1000) %>% filter(Gender == 'Female') %>% filter(!is.na(Importance_Internet_access))
+
+CombinedMaleRating <- c(MaleValidRatings$Importance_conserving_water, MaleValidRatings$Importance_Internet_access, MaleValidRatings$Importance_recycling_rubbish, MaleValidRatings$Importance_reducing_pollution, MaleValidRatings$Importance_saving_energy)
+
+CombinedFemaleRating <- c(FemaleValidRatings$Importance_conserving_water, FemaleValidRatings$Importance_Internet_access, FemaleValidRatings$Importance_recycling_rubbish, FemaleValidRatings$Importance_reducing_pollution, FemaleValidRatings$Importance_saving_energy)
+```
+
+# {.tabset .tabset-fade .tabset-pills}
+
+## Hide Q-Q Plot
+
+## Show Q-Q Plot
+
+```{r,  warning=FALSE}
+qqPlot(CombinedFemaleRating, ylab="Combined Female Ratings")
+qqPlot(CombinedMaleRating, ylab="Combined Male Ratings")
+```
+#
+
+A good way to get a glimpse into how the data is distributed is to look at the ranges. Female students had more consistent results in the upper range, while male students had lower results overall with not as tight of a range.
+
+```{r}
+
+ggplot(ValidRating, aes(x=Gender, y=combined_opinion_mean)) + geom_boxplot(fill="skyblue", color="black") + labs(title="Females students have more consistent opinion strength", y="Opinion Strength")
+```
+
+And the moment of truth, the results of the independent samples T test:
+```{r}
+pander(t.test(CombinedFemaleRating, CombinedMaleRating), mu = 0, alternative = 'two.sided', conf.level = 0.95, caption="")
+```
+
+## Conclusion
+
+The p-value is well below the significance level of .05, so we can say that there is sufficent evidence to reject the null hypothesis which is to say that male and female high school students score themselves differently on the given causes. 
+
+We cannot make a definite conclusion from this analaysis as to why this is. Some possibilities could include that high school females really do believe more strongly in their opinions, or at least as far as these six categories are concerned. Other explanations could be that they could be more concerned with _appearing_ that they believe more strongly, or perhaps the genders have equal opinion strength, but they convey them differently, resulting in disparate ratings. In order to better understand the differences in the differences between apathy and general interest levels among difference genders, further study would helpful. Some possible followup studies could include adding more varied topics or sampling different age groups to see if that makes a difference, or perhaps showing a short video clip about each topic to see how persuadable each group is.
+
+<br>
+
+<span style="font-weight:700">*Full dataset for nerds</span>
+
+# {.tabset .tabset-fade .tabset-pills}
+
+## Hide Data
+
+## Show Data
+
+```{r}
+datatable(HSS)
+```
+
+
+
+
