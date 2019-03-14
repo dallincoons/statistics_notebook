@@ -429,9 +429,152 @@ H_a: \beta_0 \neq 0
 <div style="padding-left:30px;color:darkgray;">
 <p>Expand each element below to learn more.</p>
 </div>
+<p><span style="color:steelblue;font-size:.8em;padding-left:160px;">Regression Cheat Sheet</span> <a href="javascript:showhide('regressioncheatsheet')" style="font-size:.6em;color:skyblue;">(Expand)</a></p>
+<div id="regressioncheatsheet" style="display:none;font-size:.7em;">
+<table style="width:71%;">
+<colgroup>
+<col width="9%" />
+<col width="23%" />
+<col width="11%" />
+<col width="12%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Pronunciation</th>
+<th>Meaning</th>
+<th>Math</th>
+<th>R Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(Y_i\)</span></td>
+<td>“why-eye”</td>
+<td>The data</td>
+<td><span class="math inline">\(Y_i = \beta_0 + \beta_1 X_i + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0, \sigma^2)\)</span></td>
+<td><code>YourDataSet$YourYvariable</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{Y}_i\)</span></td>
+<td>“why-hat-eye”</td>
+<td>The fitted line</td>
+<td><span class="math inline">\(\hat{Y}_i = b_0 + b_1 X_i\)</span></td>
+<td><code>lmObject$fitted.values</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(E\{Y_i\}\)</span></td>
+<td>“expected value of why-eye”</td>
+<td>True mean y-value</td>
+<td><span class="math inline">\(E\{Y_i\} = \beta_0 + \beta_1 X_i\)</span></td>
+<td><code>&lt;none&gt;</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>“beta-zero”</td>
+<td>True y-intercept</td>
+<td><code>&lt;none&gt;</code></td>
+<td><code>&lt;none&gt;</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>“beta-one”</td>
+<td>True slope</td>
+<td><code>&lt;none&gt;</code></td>
+<td><code>&lt;none&gt;</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(b_0\)</span></td>
+<td>“b-zero”</td>
+<td>Estimated y-intercept</td>
+<td><span class="math inline">\(b_0 = \bar{Y} - b_1\bar{X}\)</span></td>
+<td><code>b_0 &lt;- mean(Y) - b_1*mean(X)</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(b_1\)</span></td>
+<td>“b-one”</td>
+<td>Estimated slope</td>
+<td><span class="math inline">\(b_1 = \frac{\sum X_i(Y_i - \bar{Y})}{\sum(X_i - \bar{X})^2}\)</span></td>
+<td><code>b_1 &lt;- sum( X*(Y - mean(Y)) ) / sum( (X - mean(X))^2 )</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\epsilon_i\)</span></td>
+<td>“epsilon-eye”</td>
+<td>Distance of dot to true line</td>
+<td><span class="math inline">\(\epsilon_i = Y_i - E\{Y_i\}\)</span></td>
+<td><code>&lt;none&gt;</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_i\)</span></td>
+<td>“r-eye” or “residual-eye”</td>
+<td>Distance of dot to estimated line</td>
+<td><span class="math inline">\(r_i = Y_i - \hat{Y}_i\)</span></td>
+<td><code>lmObject$residuals</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma^2\)</span></td>
+<td>“sigma-squared”</td>
+<td>Variance of the <span class="math inline">\(\epsilon_i\)</span></td>
+<td><span class="math inline">\(Var\{\epsilon_i\} = \sigma^2\)</span></td>
+<td><code>&lt;none&gt;</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(MSE\)</span></td>
+<td>“mean squared error”</td>
+<td>Estimate of <span class="math inline">\(\sigma^2\)</span></td>
+<td><span class="math inline">\(MSE = \frac{SSE}{n-p}\)</span></td>
+<td><code>sum( lmObject$res^2 ) / (n - p)</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(SSE\)</span></td>
+<td>“sum of squared error” (residuals)</td>
+<td>Measure of dot’s total deviation from the line</td>
+<td><span class="math inline">\(SSE = \sum_{i=1}^n (Y_i - \hat{Y}_i)^2\)</span></td>
+<td><code>sum( lmObject$res^2 )</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(SSR\)</span></td>
+<td>“sum of squared regression error”</td>
+<td>Measure of line’s deviation from y-bar</td>
+<td><span class="math inline">\(SSR = \sum_{i=1}^n (\hat{Y}_i - \bar{Y})^2\)</span></td>
+<td><code>sum( (lmObject$fit - mean(YourData$Y))^2 )</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(SSTO\)</span></td>
+<td>“total sum of squares”</td>
+<td>Measure of total variation in Y</td>
+<td><span class="math inline">\(SSR + SSE = SSTO = \sum_{i=1}^n (Y_i - \bar{Y})^2\)</span></td>
+<td><code>sum( (YourData$Y - mean(YourData$Y)^2 )</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R^2\)</span></td>
+<td>“R-squared”</td>
+<td>Proportion of variation in Y explained by the regression</td>
+<td><span class="math inline">\(R^2 = \frac{SSR}{SSTO} = 1 - \frac{SSE}{SSTO}\)</span></td>
+<td><code>SSR/SSTO</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{Y}_h\)</span></td>
+<td>“why-hat-aitch”</td>
+<td>Estimated mean y-value for some x-value called <span class="math inline">\(X_h\)</span></td>
+<td><span class="math inline">\(\hat{Y}_h = b_0 + b_1 X_h\)</span></td>
+<td><code>predict(lmObject, data.frame(XvarName=#))</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(X_h\)</span></td>
+<td>“ex-aitch”</td>
+<td>Some x-value, not necessarily one of the <span class="math inline">\(X_i\)</span> values used in the regression</td>
+<td>$X_h = $ some number</td>
+<td><code>Xh = #</code></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><br /></p>
 <div id="the-mathematical-model-expand" class="section level4">
 <h4>The Mathematical Model <a href="javascript:showhide('mathmodel1')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption"><span class="math inline">\(Y_i\)</span>, <span class="math inline">\(\hat{Y}_i\)</span>, and <span class="math inline">\(E\{Y_i\}\)</span>…</span></p>
 <div id="mathmodel1" style="display:none;">
 <p>There are three main elements to the mathematical model of regression. Each of these three elements is pictured below in the “Regression Relation Diagram.”</p>
 <div style="padding-left:60px;color:darkgray;font-size:.8em;">
@@ -527,6 +670,7 @@ set.seed(101) #Allows us to always get the same &quot;random&quot; sample
 </div>
 <div id="interpreting-the-model-parameters-expand" class="section level4">
 <h4>Interpreting the Model Parameters <a href="javascript:showhide('interpretingparameters')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption"><span class="math inline">\(\beta_0\)</span> (intercept) and <span class="math inline">\(\beta_1\)</span> (slope), estimated by <span class="math inline">\(b_0\)</span> and <span class="math inline">\(b_1\)</span>, interpreted as…</span></p>
 <div id="interpretingparameters" style="display:none;">
 <p>The interpretation of <span class="math inline">\(\beta_0\)</span> is only meaningful if <span class="math inline">\(X=0\)</span> is in the scope of the model. If <span class="math inline">\(X=0\)</span> is in the scope of the model, then the intercept is interpreted as the average y-value, denoted <span class="math inline">\(E\{Y\}\)</span>, when <span class="math inline">\(X=0\)</span>.</p>
 <p>The interpretation of <span class="math inline">\(\beta_1\)</span> is the amount of increase (or decrease) in the average y-value, denoted <span class="math inline">\(E\{Y\}\)</span>, per unit change in <span class="math inline">\(X\)</span>. It is often misunderstood to be the “average change in y” or just “the change in y” but it is more correctly referred to as the “change in the average y”.</p>
@@ -556,7 +700,7 @@ abline(v = seq(16,22,2), h=seq(10,30,5), lty=3, col=&quot;gray&quot;)</code></pr
 <tr class="odd">
 <td>The <strong>histogram</strong> on the left shows gas mileages of vehicles from the mtcars data set. The average gas mileage is 20.09.</td>
 <td>The <strong>boxplot</strong> in the middle shows that if we look at gas mileage for 4, 6, and 8 cylinder vehicles separately, we find the means to be 26.66, 19.74, and 15.1, respectively. If we wanted to, we could talk about the change in the means across cylinders, and would see that the mean is decreasing, first by <span class="math inline">\(26.66 - 19.74 = 6.92\)</span> mpg, then by <span class="math inline">\(19.74 - 15.1 = 4.64\)</span> mpg.</td>
-<td>The <strong>scatterplot</strong> on the right shows that the average gas mileage (for just automatic transmission vehicles) increases by a slope of 1.44 for each 1 second increase in quarter mile time. In other words, the line gives the average y-value for any x-value. Thus, the splope of the line is the change in the average y-value.</td>
+<td>The <strong>scatterplot</strong> on the right shows that the average gas mileage (for just automatic transmission vehicles) increases by a slope of 1.44 for each 1 second increase in quarter mile time. In other words, the line gives the average y-value for any x-value. Thus, the slope of the line is the change in the average y-value.</td>
 </tr>
 </tbody>
 </table>
@@ -565,6 +709,7 @@ abline(v = seq(16,22,2), h=seq(10,30,5), lty=3, col=&quot;gray&quot;)</code></pr
 </div>
 <div id="residuals-and-errors-expand" class="section level4">
 <h4>Residuals and Errors <a href="javascript:showhide('residualsanderrors')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption"><span class="math inline">\(r_i\)</span>, the residual, estimates <span class="math inline">\(\epsilon_i\)</span>, the true error…</span></p>
 <div id="residualsanderrors" style="display:none;">
 <p>Residuals are the difference between the observed value of <span class="math inline">\(Y_i\)</span> (the point) and the predicted, or estimated value, for that point called <span class="math inline">\(\hat{Y_i}\)</span>. The errors are the true distances between the observed <span class="math inline">\(Y_i\)</span> and the actual regression relation for that point, <span class="math inline">\(E\{Y_i\}\)</span>.</p>
 <p>We will denote a <strong>residual</strong> for individual <span class="math inline">\(i\)</span> by <span class="math inline">\(r_i\)</span>, <span class="math display">\[
@@ -632,8 +777,9 @@ abline(v = seq(16,22,2), h=seq(10,30,5), lty=3, col=&quot;gray&quot;)</code></pr
 </div>
 <p><br /></p>
 </div>
-<div id="assumptions-expand" class="section level4">
-<h4>Assumptions <a href="javascript:showhide('assumptions1')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<div id="residual-plots-regression-assumptions-expand" class="section level4">
+<h4>Residual Plots &amp; Regression Assumptions <a href="javascript:showhide('assumptions1')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption">Residuals vs. fitted-values, Q-Q Plot of the residuals, and residuals vs. order plots…</span></p>
 <div id="assumptions1" style="display:none;">
 <p>There are five assumptions that should be met for the mathematical model of simple linear regression to be appropriate.</p>
 <div style="padding-left:60px;color:darkgray;font-size:.8em;">
@@ -877,6 +1023,7 @@ set.seed(123)
 </div>
 <div id="assessing-the-fit-of-a-regression-expand" class="section level4">
 <h4>Assessing the Fit of a Regression <a href="javascript:showhide('assessingthefit')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption"><span class="math inline">\(R^2\)</span>, SSTO, SSR, and SSE…</span></p>
 <div id="assessingthefit" style="display:none;">
 
 <p>Not all regressions are created equally as the three plots below show. Sometimes the dots are a clustered very tightly to the line. At other times, the dots spread out fairly dramatically from the line.</p>
@@ -1022,6 +1169,7 @@ abline(lm(y3 ~ x), col=&quot;gray&quot;)</code></pre>
 </div>
 <div id="estimating-the-model-parameters-expand" class="section level4">
 <h4>Estimating the Model Parameters <a href="javascript:showhide('estimatingparameters')" style="font-size:.6em;color:skyblue;" id="estMod">(Expand)</a></h4>
+<p><span class="expand-caption">How to get <span class="math inline">\(b_0\)</span> and <span class="math inline">\(b_1\)</span>: least squares &amp; maximum likelihood…</span></p>
 <div id="estimatingparameters" style="display:none;">
 <p>There are two approaches to estimating the parameters <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> in the regression model. The oldest and most tradiational approach is using the idea of least squares. A more general approach uses the idea of maximum likelihood (see below). Fortunately, for simple linear regression, the estimates for <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> obtained from either method are identical. The estimates for the true parameter values <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are typically denoted by <span class="math inline">\(b_0\)</span> and <span class="math inline">\(b_1\)</span>, respectively, and are given by the following formulas.</p>
 <table style="width:74%;">
@@ -1085,6 +1233,7 @@ which is directly comparable to the true, but unknown values
 </div>
 <div id="estimating-the-model-variance-expand" class="section level4">
 <h4>Estimating the Model Variance <a href="javascript:showhide('estimatingvariance')" style="font-size:.6em;color:skyblue;" id="varEst">(Expand)</a></h4>
+<p><span class="expand-caption">Estimating <span class="math inline">\(\sigma^2\)</span> with MSE…</span></p>
 <div id="estimatingvariance" style="display:none;">
 As shown previously, we can obtain estimates for the model parameters <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> with either least squares estimation or maximum likelihood estimation. It turns out that these estimates for <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are nice in the sense that on average they provide the correct estimate of the true parameter, i.e., they are unbiased estimators. On the other hand, the maximum likelihood estimate <span class="math inline">\(\hat{\sigma}^2\)</span> of the model variance <span class="math inline">\(\sigma^2\)</span> is a biased estimator. It is consistently wrong in its estimates of <span class="math inline">\(\sigma^2\)</span>. Without going into all the details, <span class="math inline">\(\hat{\sigma}^2\)</span> is a biased estimator of <span class="math inline">\(\sigma^2\)</span> because its denominator needs to represent the degrees of freedom associated with the numerator. Since <span class="math inline">\(\hat{Y}_i\)</span> in the numerator of <span class="math inline">\(\hat{\sigma}^2\)</span> is defined by
 <span class="math display">\[\begin{equation}
@@ -1105,6 +1254,7 @@ is an unbiased estimator of <span class="math inline">\(\sigma^2\)</span>. Here 
 </div>
 <div id="inference-for-the-model-parameters-expand" class="section level4">
 <h4>Inference for the Model Parameters <a href="javascript:showhide('inference1')" style="font-size:.6em;color:skyblue;" id="infModelParam">(Expand)</a></h4>
+<p><span class="expand-caption">t test formulas, sampling distributions, confidence intervals, and F tests…</span></p>
 <div id="inference1" style="display:none;">
 <p>Most inference in regression is focused on the slope, <span class="math inline">\(\beta_1\)</span>. Recall that the interpretation of <span class="math inline">\(\beta_1\)</span> is the amount of increase (or decrease) in the expected value of <span class="math inline">\(Y\)</span> per unit change in <span class="math inline">\(X\)</span>. There are three main scenarios where inference about the slope is of interest.</p>
 <ol style="list-style-type: decimal">
@@ -1317,6 +1467,7 @@ par(mai=c(1,.6,.5,.01))
 </div>
 <div id="transformations-expand" class="section level4">
 <h4>Transformations <a href="javascript:showhide('transformations')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption"><span class="math inline">\(Y&#39;\)</span>, <span class="math inline">\(X&#39;\)</span>, and returning to the original space…</span></p>
 <div id="transformations" style="display:none;">
 <p>Y transformations are denoted by y-prime, written <span class="math inline">\(Y&#39;\)</span>, and consist of raising <span class="math inline">\(Y\)</span> to some power called <span class="math inline">\(\lambda\)</span>.</p>
 <p><span class="math display">\[
@@ -1370,6 +1521,9 @@ Scatterplot Recognition
 </button>
 <button class="tablinks" onclick="openTab(event, 'BoxCoxView')">
 Box-Cox Suggestion
+</button>
+<button class="tablinks" onclick="openTab(event, 'YTransExample')">
+An Example
 </button>
 </div>
 <div id="ScatterplotView" class="tabcontent" style="display:block;">
@@ -1446,6 +1600,63 @@ mtext(side=3, text=expression(paste(&quot;Use &quot;, lambda == 2)), line=.5)</c
 <p><img src="LinearRegression_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </p>
 </div>
+<div id="YTransExample" class="tabcontent">
+<p>
+<h6 id="an-example">An Example</h6>
+<p>Suppose <span class="math inline">\(\lambda = 0.5\)</span>, so that <span class="math inline">\(Y&#39; = \sqrt{Y}\)</span>.</p>
+<p>A regression is performed using <code>sqrt(Y)</code>:</p>
+<p><code>cars.lm.t &lt;- lm(sqrt(dist) ~ speed, data=cars)</code></p>
+<p><code>summary(cars.lm.t)</code></p>
+<table>
+<thead>
+<tr class="header">
+<th> </th>
+<th>Estimate</th>
+<th>Std. Error</th>
+<th>t value</th>
+<th>Pr(&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>(Intercept)</strong></td>
+<td>1.277</td>
+<td>0.4844</td>
+<td>2.636</td>
+<td>0.01126</td>
+</tr>
+<tr class="even">
+<td><strong>speed</strong></td>
+<td>0.3224</td>
+<td>0.02978</td>
+<td>10.83</td>
+<td>1.773e-14</td>
+</tr>
+</tbody>
+</table>
+<p>Then,</p>
+<p><span class="math display">\[
+  \hat{Y}_i&#39; = 1.277 + 0.3224 X_i
+\]</span></p>
+<p>And replacing <span class="math inline">\(\hat{Y}_i&#39; = \sqrt{\hat{Y}_i}\)</span> we have</p>
+<p><span class="math display">\[
+  \sqrt{\hat{Y}_i} = 1.277 + 0.3224 X_i
+\]</span></p>
+<p>Solving for <span class="math inline">\(\hat{Y}_i\)</span> gives</p>
+<p><span class="math display">\[
+  \hat{Y}_i = (1.277 + 0.3224 X_i)^2
+\]</span></p>
+<p>Which, using <code>curve((1.277 + 0.3224*x)^2, add=TRUE)</code> (see code for details) looks like this:</p>
+<pre class="r"><code>plot(dist ~ speed, data=cars, pch=20, col=&quot;firebrick&quot;, cex=1.2, las=1,
+     xlab=&quot;Speed of the Vehicle (mph) \n the Moment the Brakes were Applied&quot;, ylab=&quot;Distance (ft) it took the Vehicle to Stop&quot;,
+     main=&quot;Don&#39;t Step in front of a Moving 1920&#39;s Vehicle...&quot;)
+mtext(side=3, text=&quot;...they take a few feet to stop.&quot;, cex=0.7, line=.5)
+legend(&quot;topleft&quot;, legend=&quot;Stopping Distance Experiment&quot;, bty=&quot;n&quot;)
+
+curve( (1.277 + 0.3224*x)^2, add=TRUE, col=&quot;firebrick&quot;)</code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</p>
+</div>
 <p><br /></p>
 <h5 id="x-transformations">X-Transformations</h5>
 <p>X-transformations are more difficult to recognize than y-transformations. This is partially because there is no Box-Cox method to automatically search for them.</p>
@@ -1492,7 +1703,95 @@ plot(Y ~ Xf, main=expression(paste(&quot;Use &quot;, X*minute == X^2)),
 ylab=&quot;Y in Original Units&quot;, pch=16, col=&quot;gray45&quot;, cex=0.9, yaxt=&#39;n&#39;, xaxt=&#39;n&#39;, xlab=&quot;X in Original Units&quot;)
 b &lt;- coef(lm(Y ~ I(Xf^2)))
 curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
-<p><img src="LinearRegression_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<p><br /></p>
+</div>
+<div id="prediction-and-confidence-intervals-for-haty_h-expand" class="section level4">
+<h4>Prediction and Confidence Intervals for <span class="math inline">\(\hat{Y}_h\)</span> <a href="javascript:showhide('predictionintervals')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption">predict(…, interval=“prediction”)… </span></p>
+<div id="predictionintervals" style="display:none;">
+<p>It is a common mistake to assume that averages (means) describe individuals. They do not. So, when providing predictions on individuals, it is crucial to capture the variability of individuals around the line.</p>
+<table style="width:69%;">
+<colgroup>
+<col width="15%" />
+<col width="12%" />
+<col width="22%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Interval</th>
+<th>R Code</th>
+<th>Math Equation</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Prediction</td>
+<td><span style="font-size:.8em;"><code>predict(..., interval=&quot;prediction&quot;)</code></span></td>
+<td><span class="math inline">\(\hat{Y}_i \pm t^* \cdot s_{\text{Pred}\ Y}\)</span></td>
+<td>Guess value for one observation</td>
+</tr>
+<tr class="even">
+<td>Confidence</td>
+<td><span style="font-size:.8em;"><code>predict(..., interval=&quot;confidence&quot;)</code></span></td>
+<td><span class="math inline">\(\hat{Y}_i \pm t^* \cdot s_{\hat{Y}}\)</span></td>
+<td>Estimate location of mean y-value</td>
+</tr>
+</tbody>
+</table>
+<p><code>predict(mylm, data.frame(XvarName = number), interval=...)</code></p>
+<p><br /> <br /></p>
+<p>For example, consider this graph. Then <a href="javascript:showhide('predictionintervalsgraph')" style="color:skyblue;">click here</a> to read about the graph.</p>
+<div id="predictionintervalsgraph" style="padding-left:30px;padding-right:30px;font-size:.9em;display:none;">
+<p>Notice the three dots above 15 mph in the graph. Each of these dots show a car that was going 15 mph when it applied the brakes. However, stopping distances of the three individual cars differ with one at 20 feet, one at 26 feet and one at 54 feet.</p>
+<p>The regression line represents the average stopping distance of cars. In this case, cars going 15 mph are estimated to have an average stopping distance of about 40 feet, as shown by the line. But individual vehicles, all going the same speed of 15 mph, varied from stopping distances of 20 feet up to 54 feet!</p>
+<p>So, to predict that a car going 15 mph will take 41.4 feet to stop, doesn’t tell the whole story. Far more revealing is the complete statement, “Cars going 15 mph are predicted to take anywhere from 10.2 to 72.6 feet to stop, with an average stopping distance of 41.4 feet.” This is called the “prediction interval” and is shown in the graph in blue. It is obtained in R with the codes:</p>
+<p><code>cars.lm &lt;- lm(dist ~ speed, data=cars)</code></p>
+<p><code>predict(cars.lm, data.frame(speed=15), interval=&quot;prediction&quot;)</code></p>
+<pre class="r"><code>cars.lm &lt;- lm(dist ~ speed, data=cars)
+pander(predict(cars.lm, data.frame(speed=15), interval=&quot;prediction&quot;))</code></pre>
+<table style="width:33%;">
+<colgroup>
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">fit</th>
+<th align="center">lwr</th>
+<th align="center">upr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">41.41</td>
+<td align="center">10.17</td>
+<td align="center">72.64</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>plot(dist ~ speed, data=cars, pch=20, col=&quot;firebrick&quot;, cex=1.2, las=1,
+     xlab=&quot;Speed of the Vehicle (mph) \n the Moment the Brakes were Applied&quot;, ylab=&quot;Distance (ft) it took the Vehicle to Stop&quot;,
+     main=&quot;Don&#39;t Step in front of a Moving 1920&#39;s Vehicle...&quot;)
+mtext(side=3, text=&quot;...they take a few feet to stop.&quot;, cex=0.7, line=.5)
+legend(&quot;topleft&quot;, legend=&quot;Stopping Distance Experiment&quot;, bty=&quot;n&quot;)
+points(dist ~ speed, data=subset(cars, speed==15), pch=20, col=&quot;firebrick2&quot;, cex=1.5)
+
+cars.lm &lt;- lm(dist ~ speed, data=cars)
+abline(cars.lm, lwd=2, col=rgb(.689,.133,.133, .3))
+abline(h=seq(0,120,20), v=seq(5,25,5), lty=2, col=rgb(.2,.2,.2,.2))
+abline(v=15, lty=2, col=&quot;firebrick&quot;)
+
+preds &lt;- predict(cars.lm, data.frame(speed=15), interval=&quot;prediction&quot;)
+lines(c(15,15), preds[2:3] - c(-.5,.5), col=rgb(.529,.8078,.9216,.4), lwd=12)
+lines(c(0,15), preds[c(2,2)], col=rgb(.529,.8078,.9216,.8))
+lines(c(0,15), preds[c(3,3)], col=rgb(.529,.8078,.9216,.8))</code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
 <p><br /></p>
 <hr />
@@ -1517,9 +1816,9 @@ curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
 <h3>Overview</h3>
 <div style="padding-left:125px;">
 <p>A typical multiple regression model is given by the equation <span class="math display">\[
-  Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \cdots + \beta_p X_{pi} + \epsilon_i
+  Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \cdots + \beta_{p-1} X_{p-1,i} + \epsilon_i
 \]</span> where <span class="math inline">\(\epsilon_i\sim N(0,\sigma^2)\)</span>.</p>
-<p>The coefficient <span class="math inline">\(\beta_j\)</span> is interpreted as the change in the expected value of <span class="math inline">\(Y\)</span> for a unit increase in <span class="math inline">\(X_{j}\)</span>, holding all other variables constant, for <span class="math inline">\(j=1,\ldots,p\)</span>.</p>
+<p>The coefficient <span class="math inline">\(\beta_j\)</span> is interpreted as the change in the expected value of <span class="math inline">\(Y\)</span> for a unit increase in <span class="math inline">\(X_{j}\)</span>, holding all other variables constant, for <span class="math inline">\(j=1,\ldots,p-1\)</span>.</p>
 <p>See the <strong>Explanation</strong> tab for details about possible hypotheses here.</p>
 <hr />
 </div>
@@ -1529,13 +1828,15 @@ curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
 <div style="padding-left:125px;">
 <p><strong>Console</strong> Help Command: <code>?lm()</code></p>
 <p>Everything is the same as in simple linear regression except that more variables are allowed in the call to <code>lm()</code>.</p>
-<p><code>mylm &lt;- lm(y ~ x1 + x2 + ... + xp + ..., data=YourDataSet)</code></p>
+<p><code>mylm &lt;- lm(Y ~ X1 + X2 + X1:X2 + ..., data=YourDataSet)</code></p>
+<p><code>summary(mylm)</code></p>
 <ul>
 <li><code>mylm</code> is some name you come up with to store the results of the <code>lm()</code> test. Note that <code>lm()</code> stands for “linear model.”</li>
-<li><code>y</code> must be a “numeric” vector of the quantitative response variable.</li>
-<li><code>x1</code>, <code>x2</code>, <code>...</code>, <code>xp</code> are the explanatory variables. These can either be quantitative or qualitative. Note that R treats “numeric” variables as quantitative and “character” or “factor” variables as qualitative. Further, when R thinks a variable is qualitative, then it creates a set of dummy variables that are each coded as 0,1 variables. It creates one fewer dummy variables than levels of the original qualitative variable.</li>
+<li><code>Y</code> must be a “numeric” vector of the quantitative response variable.</li>
+<li><code>X1</code> and <code>X2</code> are the explanatory variables. These can either be quantitative or qualitative. Note that R treats “numeric” variables as quantitative and “character” or “factor” variables as qualitative. R will automatcially recode qualitative variables to become “numeric” variables using a 0,1 encoding. See the Explanation tab for details.</li>
 <li><code>YourDataSet</code> is the name of your data set.</li>
-<li><code>...</code> interactions are also allowed.</li>
+<li><code>X1:X2</code> is called the interaction term. See the Explanation tab for details.</li>
+<li><code>...</code> emphasizes that as many explanatory variables as are desired can be included in the model.</li>
 </ul>
 <hr />
 </div>
@@ -1543,15 +1844,445 @@ curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
 <div id="explanation-1" class="section level3">
 <h3>Explanation</h3>
 <div style="padding-left:125px;">
-<p>The extension of linear regression to multiple regression is fairly direct yet very powerful. Multiple regression expands the simple regression model to include more explanatory variables. These extra variables are sometimes called <em>covariates</em>. Like simple regression, multiple regression still only allows for a single quantitative response variable.</p>
-<h4 id="the-model">The Model</h4>
-<p>The multiple linear regression model is given by <span class="math display">\[
-  Y_i = \underbrace{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \cdots + \beta_p X_{pi}}_{E\{Y\}} + \epsilon_i
-\]</span> where <span class="math inline">\(\epsilon_i\sim N(0,\sigma^2)\)</span>. Thus, it is a direct extension of the simple linear regression model to the scenario where more than one explanatory variable can be included in the model.</p>
+<p>The extension of linear regression to multiple regression is fairly direct: include more than one explanatory variable in the regression model for the average y-value.</p>
+<h4 id="extending-the-mathematical-model-expand">Extending The Mathematical Model <a href="javascript:showhide('mathmodel2')" style="font-size:.6em;color:skyblue;">(Expand)</a></h4>
+<p><span class="expand-caption">Options for <span class="math inline">\(E\{Y_i\}\)</span> beyond <span class="math inline">\(\beta_0 + \beta_1 X_i\)</span>…</span></p>
+<div id="mathmodel2" style="display:none;">
+<p>The multiple linear regression model is given by combining (1) “a model” for the mean y-value, denoted by <span class="math inline">\(E\{Y_i\}\)</span>, and (2) a normally distributed error term, <span class="math inline">\(\epsilon_i\)</span>. In short <span class="math inline">\(Y_i = E\{Y_i\} + \epsilon_i\)</span>. To be more exact,</p>
+<p><span class="math display">\[
+  Y_i = \overbrace{\underbrace{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \cdots + \beta_{p-1} X_{p-1,i}}_{E\{Y_i\}}}^\text{&quot;The Model&quot;} + \epsilon_i \quad \text{where} \ \epsilon_i \sim N(0, \sigma^2)
+\]</span></p>
+<p>Notice the <code>...</code> in the model above. This implies that the model can be many things. Here are some “basic” examples.</p>
+<pre class="r"><code>par(mfrow=c(1,3), mai=c(0.1,0.1,0.3,0.1), cex.main=1.5)
+
+plot(Wind ~ Temp, data=airquality, pch=21, bg=&quot;gray83&quot;, col=&quot;skyblue&quot;, yaxt=&#39;n&#39;, xaxt=&#39;n&#39;, main=&quot;Simple Linear Model&quot;, cex.main=1)
+lm.slr &lt;- lm(Wind ~ Temp, data=airquality)
+abline(lm.slr, col=&quot;orange&quot;, lwd=2)
+
+
+plot(Temp ~ Month, data=airquality, pch=21, bg=&quot;gray83&quot;, col=&quot;skyblue&quot;, yaxt=&#39;n&#39;, xaxt=&#39;n&#39;, main=&quot;Quadratic Model&quot;, cex.main=1)
+lm.quad &lt;- lm(Temp ~ Month + I(Month^2), data=airquality)
+b &lt;- coef(lm.quad)
+curve(b[1] + b[2]*x + b[3]*x^2, col=&quot;orange&quot;, lwd=2, add=TRUE)
+
+
+plot(mpg ~ qsec, data=mtcars, col=c(&quot;skyblue&quot;,&quot;orange&quot;)[as.factor(am)], pch=21, bg=&quot;gray83&quot;, xaxt=&#39;n&#39;, yaxt=&#39;n&#39;, main=&quot;Two-lines Model&quot;, cex.main=1)
+lm.2lines &lt;- lm(mpg ~ qsec + am + qsec:am, data=mtcars)
+b &lt;- coef(lm.2lines)
+curve(b[1] + b[2]*x, col=&quot;skyblue&quot;, lwd=2, add=TRUE)
+curve(b[1] + b[3] + (b[2] + b[4])*x, col=&quot;orange&quot;, lwd=2, add=TRUE)</code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>To learn more about the models depicted above, click on the name of the model below.</p>
+<div class="tab">
+<button class="tablinks" onclick="openTab(event, 'LearnMoresimpleLinearModel')">
+Simple Linear Model
+</button>
+<button class="tablinks" onclick="openTab(event, 'LearnMoreQuadraticModel')">
+Quadratic Model
+</button>
+<button class="tablinks" onclick="openTab(event, 'LearnMoreTwoLinesModel')">
+Two-lines Model
+</button>
+<button class="tablinks" onclick="openTab(event, 'LearnMorethreeDModel')">
+3D Model
+</button>
+</div>
+<div id="LearnMoresimpleLinearModel" class="tabcontent" style="display:block;">
+<p>
+<p><span class="math display">\[
+ Y_i = \overbrace{\underbrace{\beta_0 + \beta_1 X_i}_{E\{Y_i\}}}^\text{Simple Linear Model} + \epsilon_i
+\]</span></p>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('simplemodeldetails')" style="font-size:1.1em;color:skyblue;">(Expand details…)</a></span></p>
+<div id="simplemodeldetails" style="display:none;">
+<p>The Simple Linear Regression model uses a single x-variable once: <span class="math inline">\(X_i\)</span>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>Y-intercept of the Model</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>Slope of the line</td>
+</tr>
+</tbody>
+</table>
+</div>
+</p>
+</div>
+<div id="LearnMoreQuadraticModel" class="tabcontent">
+<p>
+<p><span class="math display">\[
+ Y_i = \overbrace{\underbrace{\beta_0 + \beta_1 X_i + \beta_2 X_i^2}_{E\{Y_i\}}}^\text{Quadratic Model} + \epsilon_i
+\]</span></p>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('quadraticmodeldetails')" style="font-size:1.1em;color:skyblue;">(Expand details…)</a></span></p>
+<div id="quadraticmodeldetails" style="display:none;">
+<p>The Quadratic model uses the same <span class="math inline">\(X\)</span>-variable twice, once with a <span class="math inline">\(\beta_1 X_i\)</span> term and once with a <span class="math inline">\(\beta_2 X_i^2\)</span> term. The <span class="math inline">\(X_i^2\)</span> term is called the “quadratic” term.</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="86%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>Y-intercept of the Model.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>Controls the x-position of the vertex of the parabola by <span class="math inline">\(\frac{-\beta_1}{2\cdot\beta_2}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>Controls the concavity and “steepness” of the Model: negative values face down, positive values face up; large values imply “steeper” parabolas and low values imply “flatter” parabolas. Also involved in the position of the vertex, see <span class="math inline">\(\beta_1\)</span>’s explanation.</td>
+</tr>
+</tbody>
+</table>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('quadraticmodelelexample')" style="font-size:1.1em;color:skyblue;">(Show Example…)</a></span></p>
+<div id="quadraticmodelelexample" style="display:none;">
+<p><strong>An Example</strong></p>
+<p>Using the <code>airquality</code> data set, we run the following “quadratic” regression.</p>
+<p><span class="math display">\[
+  \underbrace{Y_i}_\text{Temp} \underbrace{=}_{\sim} \overbrace{\beta_0}^{\text{y-int}} + \overbrace{\beta_1}^{\stackrel{\text{slope}}{\text{term}}} \underbrace{X_{i}}_\text{Month} + \overbrace{\beta_2}^{\stackrel{\text{quadratic}}{\text{term}}}  \underbrace{X_{i}^2}_\text{I(Month^2)} + \epsilon_i
+\]</span></p>
+<a href="javascript:showhide('quadraticregressionexamplecode')">
+<div class="hoverchunk">
+<p><span class="tooltipr"> lm.quad &lt;- <span class="tooltiprtext">A name we made up for our “quadratic” regression.</span> </span><span class="tooltipr"> lm( <span class="tooltiprtext">R function lm used to perform linear regressions in R. The lm stands for “linear model”.</span> </span><span class="tooltipr"> Temp <span class="tooltiprtext">Y-variable, should be quantitative.</span> </span><span class="tooltipr">  ~  <span class="tooltiprtext">The tilde <code>~</code> is what lm(…) uses to state the regression equation <span class="math inline">\(Y_i = ...\)</span>. Notice that the <code>~</code> is not followed by <span class="math inline">\(\beta_0 + \beta_1\)</span> like <span class="math inline">\(Y_i = ...\)</span>. Instead, <span class="math inline">\(X_{1i}\)</span> is the first term following <code>~</code>. This is because the <span class="math inline">\(\beta\)</span>’s are going to be estimated by the lm(…). These estimates can be found using summary(lmObject).</span> </span><span class="tooltipr"> Month <span class="tooltiprtext"><span class="math inline">\(X_{i}\)</span>, should be quantitative.</span> </span><span class="tooltipr">  +  <span class="tooltiprtext">The plus <code>+</code> is used between each term in the model. Note that only the x-variables are included in the lm(…) from the <span class="math inline">\(Y_i = ...\)</span> model. No beta’s are included.</span> </span><span class="tooltipr"> I(Month^2) <span class="tooltiprtext"><span class="math inline">\(X_{i}^2\)</span>, where the function I(…) protects the squaring of Month from how lm(…) would otherwise interpret that statement. The I(…) function must be used anytime you raise an x-variable to a power in the lm(…) statement.</span> </span><span class="tooltipr"> , data=airquality <span class="tooltiprtext">This is the data set we are using for the regression.</span> </span><span class="tooltipr"> )<br />
+<span class="tooltiprtext">Closing parenthsis for the lm(…) function.</span> </span><span class="tooltipr">     <br />
+<span class="tooltiprtext">Press Enter to run the code.</span> </span><span class="tooltipr" style="float:right;">  …  <span class="tooltiprtext">Click to View Output.</span> </span></p>
+</div>
+</a>
+<div id="quadraticregressionexamplecode" style="display:none;">
+<p>Pay special attention to how the lm(…) code uses <span class="math inline">\(Y_i \sim X_{i} + X_{i}^2\)</span> and drops all <span class="math inline">\(\beta\)</span>’s and <span class="math inline">\(\epsilon\)</span> from the model statement. This is because the estimates for the <span class="math inline">\(\beta\)</span>’s and <span class="math inline">\(\epsilon\)</span> are given by the output of the lm(…) funtion in the “Estimates” column of summary(….) and in <code>lmObject$residuals</code>.</p>
+</div>
+<pre class="r"><code>lm.quad &lt;- lm(Temp ~ Month + I(Month^2), data=airquality)
+pander(summary(lm.quad)$coefficients)</code></pre>
+<table style="width:88%;">
+<colgroup>
+<col width="25%" />
+<col width="15%" />
+<col width="18%" />
+<col width="13%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">Estimate</th>
+<th align="center">Std. Error</th>
+<th align="center">t value</th>
+<th align="center">Pr(&gt;|t|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>(Intercept)</strong></td>
+<td align="center">-95.73</td>
+<td align="center">15.24</td>
+<td align="center">-6.281</td>
+<td align="center">3.458e-09</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Month</strong></td>
+<td align="center">48.72</td>
+<td align="center">4.489</td>
+<td align="center">10.85</td>
+<td align="center">1.29e-20</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>I(Month^2)</strong></td>
+<td align="center">-3.283</td>
+<td align="center">0.3199</td>
+<td align="center">-10.26</td>
+<td align="center">4.737e-19</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>estimates</strong> shown above approximate the <span class="math inline">\(\beta\)</span>’s in the regression model: <span class="math inline">\(\beta_0\)</span> is estimated by the (Intercept) value of -95.73, <span class="math inline">\(\beta_1\)</span> is estimated by the <code>Month</code> value of 48.72, and <span class="math inline">\(\beta_2\)</span> is estimated by the <code>I(Month^2)</code> value of -3.283.</p>
+<p>Because the estimate of the <span class="math inline">\(\beta_2\)</span> term is negative, this parabola will “open down”. The vertex of this parabola will be at <span class="math inline">\(-(48.72)/(2\cdot (-95.73)) = 0.2544657\)</span>, and the y-intercept is -95.73.</p>
+<p><span class="math display">\[
+\hat{Y}_i = \overbrace{-95.73}^\text{y-int} + \overbrace{48.72}^{\stackrel{\text{slope}}{\text{term}}} X_{i} + \overbrace{-3.283}^{\stackrel{\text{quadratic}}{\text{term}}} X_{i}^2
+\]</span></p>
+<p>The regression function is drawn as follows. Be sure to look at the “Code” to understand how this graph was created using the ideas in the equation above.</p>
+<table>
+<tr>
+<td>
+<p><strong>Using Base R</strong></p>
+<pre class="r"><code>plot(Temp ~ Month, data=airquality, col=&quot;skyblue&quot;, pch=21, bg=&quot;gray83&quot;, main=&quot;Quadratic Model using airquality data set&quot;, cex.main=1)
+
+#get the &quot;Estimates&quot; automatically:
+b &lt;- coef(lm.quad)
+# Then b will have 3 estimates:
+# b[1] is the estimate of beta_0: 35.38
+# b[2] is the estimate of beta_1: -7.099
+# b[3] is the estimate of beta_2: 0.4759
+curve(b[1] + b[2]*x + b[3]*x^2, col=&quot;skyblue&quot;, lwd=2, add=TRUE)</code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+</td>
+<td>
+<p><strong>Using ggplot2</strong></p>
+<pre class="r"><code>#get the &quot;Estimates&quot; automatically:
+b &lt;- coef(lm.quad)
+# Then b will have 3 estimates:
+# b[1] is the estimate of beta_0: 35.38
+# b[2] is the estimate of beta_1: -7.099
+# b[3] is the estimate of beta_2: 0.4759
+
+ggplot(airquality, aes(y=Temp, x=Month)) +
+  geom_point(pch=21, bg=&quot;gray83&quot;, color=&quot;skyblue&quot;) +
+  #geom_smooth(method=&quot;lm&quot;, se=F, formula = y ~ poly(x, 2)) + #easy way, but the more involved manual way using stat_function (see below) is more dynamic.
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2, color=&quot;skyblue&quot;) +
+  labs(title=&quot;Quadratic Model using airquality data set&quot;) </code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</p>
+</div>
+<div id="LearnMoreTwoLinesModel" class="tabcontent">
+<p>
+<p><span class="math display">\[
+ Y_i = \overbrace{\underbrace{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{1i} X_{2i}}_{E\{Y_i\}}}^\text{Two-lines Model} + \epsilon_i 
+\]</span></p>
+<p><span class="math display">\[
+ X_{2i} = \left\{\begin{array}{ll} 1, &amp; \text{Group B} \\ 0, &amp; \text{Group A} \end{array}\right.
+\]</span></p>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('twolinesmodeldetails')" style="font-size:1.1em;color:skyblue;">(Expand details…)</a></span></p>
+<div id="twolinesmodeldetails" style="display:none;">
+<p>The so called “two-lines” model uses a quantitative <span class="math inline">\(X_{1i}\)</span> variable and a 0,1 indicator variable <span class="math inline">\(X_{2i}\)</span>. It is a basic example of how a “dummy variable” or “indicator variable” can be used to turn qualitative variables into quantitative terms. In this case, the indicator variable <span class="math inline">\(X_{2i}\)</span>, which is either 0 or 1, produces two separate lines: one line for Group A, and one line for Group B.</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="86%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>Y-intercept of the Model.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>Controls the slope of the “base-line” of the model, the “Group 0” line.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>Controls the <strong>change in y-intercept</strong> for the second line in the model as compared to the y-intercept of the “base-line” line.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_3\)</span></td>
+<td>Called the “interaction” term. Controls the <strong>change in the slope</strong> for the second line in the model as compared to the slope of the “base-line” line.</td>
+</tr>
+</tbody>
+</table>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('twolinesmodelexample')" style="font-size:1.1em;color:skyblue;">(Show Example…)</a></span></p>
+<div id="twolinesmodelexample" style="display:none;">
+<p><strong>An Example</strong></p>
+<p>Using the <code>mtcars</code> data set, we run the following “two-lines” regression. Note that <code>am</code> has only 0 or 1 values: <code>View(mtcars)</code>.</p>
+<p><span class="math display">\[
+  \underbrace{Y_i}_\text{mpg} \underbrace{=}_{\sim} \overbrace{\beta_0}^{\stackrel{\text{y-int}}{\text{baseline}}} + \overbrace{\beta_1}^{\stackrel{\text{slope}}{\text{baseline}}} \underbrace{X_{1i}}_\text{qsec} + \overbrace{\beta_2}^{\stackrel{\text{change in}}{\text{y-int}}}  \underbrace{X_{2i}}_\text{am} + \overbrace{\beta_3}^{\stackrel{\text{change in}}{\text{slope}}} \underbrace{X_{1i}X_{2i}}_\text{qsec:am} + \epsilon_i
+\]</span></p>
+<a href="javascript:showhide('twolinesregressionexamplecode')">
+<div class="hoverchunk">
+<p><span class="tooltipr"> lm.2lines &lt;- <span class="tooltiprtext">A name we made up for our “two-lines” regression.</span> </span><span class="tooltipr"> lm( <span class="tooltiprtext">R function lm used to perform linear regressions in R. The lm stands for “linear model”.</span> </span><span class="tooltipr"> mpg <span class="tooltiprtext">Y-variable, should be quantitative.</span> </span><span class="tooltipr">  ~  <span class="tooltiprtext">The tilde <code>~</code> is what lm(…) uses to state the regression equation <span class="math inline">\(Y_i = ...\)</span>. Notice that the <code>~</code> is not followed by <span class="math inline">\(\beta_0 + \beta_1\)</span> like <span class="math inline">\(Y_i = ...\)</span>. Instead, <span class="math inline">\(X_{1i}\)</span> is the first term following <code>~</code>. This is because <span class="math inline">\(\beta\)</span>’s are going to be estimated by the lm(…). These estimates can be found using summary(lmObject).</span> </span><span class="tooltipr"> qsec <span class="tooltiprtext"><span class="math inline">\(X_{1i}\)</span>, should be quantitative.</span> </span><span class="tooltipr">  +  <span class="tooltiprtext">The plus <code>+</code> is used between each term in the model. Note that only the x-variables are included in the lm(…) from the <span class="math inline">\(Y_i = ...\)</span> model. No beta’s are included.</span> </span><span class="tooltipr"> am <span class="tooltiprtext"><span class="math inline">\(X_{2i}\)</span>, an indicator or 0,1 variable. This term allows the y-intercept of the two lines to differ.</span> </span><span class="tooltipr">  +  <span class="tooltiprtext">The plus <code>+</code> is used between each term in the model. Note that only the x-variables are included in the lm(…) from the <span class="math inline">\(Y_i = ...\)</span> model. No beta’s are included.</span> </span><span class="tooltipr"> qsec:am <span class="tooltiprtext"><span class="math inline">\(X_{1i}X_{2i}\)</span> the interaction term. This allows the slopes of the two lines to differ.</span> </span><span class="tooltipr"> , data=mtcars <span class="tooltiprtext">This is the data set we are using for the regression.</span> </span><span class="tooltipr"> )<br />
+<span class="tooltiprtext">Closing parenthsis for the lm(…) function.</span> </span><span class="tooltipr">     <br />
+<span class="tooltiprtext">Press Enter to run the code.</span> </span><span class="tooltipr" style="float:right;">  …  <span class="tooltiprtext">Click to View Output.</span> </span></p>
+</div>
+</a>
+<div id="twolinesregressionexamplecode" style="display:none;">
+<p>Pay special attention to how the lm(…) code uses <span class="math inline">\(Y_i \sim X_{1i} + X_{2i} + X_{1i}X_{2i}\)</span> and drops all <span class="math inline">\(\beta\)</span>’s and <span class="math inline">\(\epsilon\)</span> from the model statement. This is because the estimates for the <span class="math inline">\(\beta\)</span>’s and <span class="math inline">\(\epsilon\)</span> are given by the output of the lm(…) funtion in the “Estimates” column of summary(….) and in <code>lm.2lines$residuals</code>.</p>
+</div>
+<pre class="r"><code>lm.2lines &lt;- lm(mpg ~ qsec + am + qsec:am, data=mtcars)
+pander(summary(lm.2lines)$coefficients)</code></pre>
+<table style="width:86%;">
+<colgroup>
+<col width="25%" />
+<col width="15%" />
+<col width="18%" />
+<col width="13%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">Estimate</th>
+<th align="center">Std. Error</th>
+<th align="center">t value</th>
+<th align="center">Pr(&gt;|t|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>(Intercept)</strong></td>
+<td align="center">-9.01</td>
+<td align="center">8.218</td>
+<td align="center">-1.096</td>
+<td align="center">0.2823</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>qsec</strong></td>
+<td align="center">1.439</td>
+<td align="center">0.45</td>
+<td align="center">3.197</td>
+<td align="center">0.003432</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>am</strong></td>
+<td align="center">-14.51</td>
+<td align="center">12.48</td>
+<td align="center">-1.163</td>
+<td align="center">0.2548</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>qsec:am</strong></td>
+<td align="center">1.321</td>
+<td align="center">0.7017</td>
+<td align="center">1.883</td>
+<td align="center">0.07012</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>estimates</strong> shown above approximate the <span class="math inline">\(\beta\)</span>’s in the regression model: <span class="math inline">\(\beta_0\)</span> is estimated by the (Intercept), <span class="math inline">\(\beta_1\)</span> is estimated by the <code>qsec</code> value of 1.439, <span class="math inline">\(\beta_2\)</span> is estimated by the <code>am</code> value of -14.51, and <span class="math inline">\(\beta_3\)</span> is estimated by the <code>qsec:am</code> value of 1.321.</p>
+<p>This gives two separate equations of lines.</p>
+<p><strong>Automatic Transmission (am==0, <span class="math inline">\(X_{2i} = 0\)</span>) Line</strong></p>
+<p><span class="math display">\[
+\hat{Y}_i = \overbrace{-9.01}^{\stackrel{\text{y-int}}{\text{baseline}}} + \overbrace{1.439}^{\stackrel{\text{slope}}{\text{baseline}}} X_{1i}
+\]</span></p>
+<p><strong>Manual Transmission (am==1 , <span class="math inline">\(X_{2i} = 1\)</span>) Line</strong></p>
+<p><span class="math display">\[
+\hat{Y}_i = \underbrace{(\overbrace{-9.01}^{\stackrel{\text{y-int}}{\text{baseline}}} + \overbrace{-14.51}^{\stackrel{\text{change in}}{\text{y-int}}})}_{\stackrel{\text{y-intercept}}{-23.52}} + \underbrace{(\overbrace{1.439}^{\stackrel{\text{slope}}{\text{baseline}}} +\overbrace{1.321}^{\stackrel{\text{change in}}{\text{slope}}})}_{\stackrel{\text{slope}}{2.76}} X_{1i}
+\]</span></p>
+<p>These lines are drawn as follows. Be sure to look at the “Code” to understand how this graph was created using the ideas in the two equations above.</p>
+<table>
+<tr>
+<td>
+<p><strong>Using Base R</strong></p>
+<pre class="r"><code>plot(mpg ~ qsec, data=mtcars, col=c(&quot;skyblue&quot;,&quot;orange&quot;)[as.factor(am)], pch=21, bg=&quot;gray83&quot;, main=&quot;Two-lines Model using mtcars data set&quot;, cex.main=1)
+
+legend(&quot;topleft&quot;, legend=c(&quot;Baseline (am==0)&quot;, &quot;Changed-line (am==1)&quot;), bty=&quot;n&quot;, lty=1, col=c(&quot;skyblue&quot;,&quot;orange&quot;), cex=0.8)
+
+#get the &quot;Estimates&quot; automatically:
+b &lt;- coef(lm.2lines)
+# Then b will have 4 estimates:
+# b[1] is the estimate of beta_0: -9.0099
+# b[2] is the estimate of beta_1:  1.4385
+# b[3] is the estimate of beta_2: -14.5107
+# b[4] is the estimate of beta_3: 1.3214
+curve(b[1] + b[2]*x, col=&quot;skyblue&quot;, lwd=2, add=TRUE)  #baseline (in blue)
+curve((b[1] + b[3]) + (b[2] + b[4])*x, col=&quot;orange&quot;, lwd=2, add=TRUE) #changed line (in orange)</code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+</td>
+<td>
+<p><strong>Using ggplot2</strong></p>
+<pre class="r"><code>#get the &quot;Estimates&quot; automatically:
+b &lt;- coef(lm.2lines)
+# Then b will have 4 estimates:
+# b[1] is the estimate of beta_0: -9.0099
+# b[2] is the estimate of beta_1:  1.4385
+# b[3] is the estimate of beta_2: -14.5107
+# b[4] is the estimate of beta_3: 1.3214
+
+ggplot(mtcars, aes(y=mpg, x=qsec, color=factor(am))) +
+  geom_point(pch=21, bg=&quot;gray83&quot;) +
+  #geom_smooth(method=&quot;lm&quot;, se=F) + #easy way, but only draws the full interaction model. The manual way using stat_function (see below) is more involved, but more dynamic.
+  stat_function(fun = function(x) b[1] + b[2]*x, color=&quot;skyblue&quot;) + #am==0 line
+  stat_function(fun = function(x) (b[1]+b[3]) + (b[2]+b[4])*x,color=&quot;orange&quot;) + #am==1 line 
+  scale_color_manual(name=&quot;Transmission (am)&quot;, values=c(&quot;skyblue&quot;,&quot;orange&quot;)) +
+  labs(title=&quot;Two-lines Model using mtcars data set&quot;) </code></pre>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</p>
+</div>
+<div id="LearnMorethreeDModel" class="tabcontent">
+<p>
+<p><span class="math display">\[
+ Y_i = \overbrace{\underbrace{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{1i}X_{2i}}_{E\{Y_i\}}}^\text{3D Model} + \epsilon_i
+\]</span></p>
+<p><span style="padding-left:15px;"><a href="javascript:showhide('threedmodeldetails')" style="font-size:1.1em;color:skyblue;">(Expand details…)</a></span></p>
+<div id="threedmodeldetails" style="display:none;">
+<p>The so called “3D” regression model uses two different quantitative x-variables, an <span class="math inline">\(X_{1i}\)</span> and an <span class="math inline">\(X_{2i}\)</span>. Unlike the two-lines model where <span class="math inline">\(X_{2i}\)</span> could only be a 0 or a 1, this <span class="math inline">\(X_{2i}\)</span> variable is quantitative, and can take on any quantitative value.</p>
+<table style="width:100%;">
+<colgroup>
+<col width="13%" />
+<col width="86%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>Y-intercept of the Model</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_1\)</span></td>
+<td>Slope of the line in the <span class="math inline">\(X_1\)</span> direction.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_2\)</span></td>
+<td>Slope of the line in the <span class="math inline">\(X_2\)</span> direction.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_3\)</span></td>
+<td>Interaction term that allows the model, which is a plane in three-dimensional space, to “bend”. If this term is zero, then the regression surface is just a flat plane.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>An Example</strong></p>
+<p>Here is what a 3D regression looks like when there is no interaction term. The two x-variables of <code>Month</code> and <code>Temp</code> are being used to predict the y-variable of <code>Ozone</code>.</p>
+<p><code>air_lm &lt;- lm(Ozone ~ Temp + Month, data= airquality)</code></p>
+<pre class="r"><code>## Hint: library(car) has a scatterplot 3d function which is simple to use
+#  but the code should only be run in your console, not knit.
+
+## library(car)
+## scatter3d(Y ~ X1 + X2, data=yourdata)
+
+
+
+## To embed the 3d-scatterplot inside of your html document is harder.
+#library(plotly)
+#library(reshape2)
+
+#Perform the multiple regression</code></pre>
+<p>Here is what a 3D regression looks like when the interaction term is present. The two x-variables of <code>Month</code> and <code>Temp</code> are being used to predict the y-variable of <code>Ozone</code>.</p>
+<p><code>air_lmi &lt;- lm(Ozone ~ Temp + Month + Temp:Month, data= airquality)</code></p>
+</div>
+</p>
+</div>
+<p><br/> <br/></p>
+<p>In fact, the model for <span class="math inline">\(E\{Y_i\}\)</span> can be any “linear combination” of <span class="math inline">\(\beta\)</span>’s, which means <span class="math inline">\(\beta\)</span> times some X-variable plus <span class="math inline">\(\beta\)</span> times some X-variable plus… plus the error term <span class="math inline">\(\epsilon_i\)</span>. So you could have <span class="math inline">\(\beta_1 \sin(X_i)\)</span>, <span class="math inline">\(\beta_2 e^{X_2i}\)</span>, and anything else you can dream up. But <span class="math inline">\(e^{\beta_1 X_i}\)</span> is not allowed. Of course, you could fit the model <span class="math inline">\(Y_i = e^{\beta_0 + \beta_1 X_i + \epsilon_i}\)</span> using a <span class="math inline">\(\log(Y_i)\)</span> transformation, but then, the regression would actually be <span class="math inline">\(\log(Y_i) = \beta_0 + \beta_1 X_i + \epsilon_i\)</span> which is again a “linear regression”.</p>
 <div style="padding-left:15px; color:#a8a8a8;">
 <p><strong>Note</strong>: Interactions, transformations of other variables, and qualitative variables can all be included in the model. For example, if a model included three explanatory variables, <span class="math inline">\(X_1,X_2,X_3\)</span>, then <span class="math inline">\(X_{3i}\)</span> could be defined to be the interaction between <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_3\)</span>, i.e., <span class="math inline">\(X_{3i} = X_{1i}\cdot X_{2i}\)</span>. If <span class="math inline">\(X_3\)</span> was instead to represent a qualitative variable with two levels, then we could use a 0 to represent one level of the variable and a 1 to represent the other level. If we had good reason to do so, we could even let <span class="math inline">\(X_{3i} = X_{1i}^2\)</span> or <span class="math inline">\(\log(X_{1i})\)</span> or some other transformation of another <span class="math inline">\(X\)</span> variable.</p>
 </div>
 <p>Say we are interested in the price of a vehicle, particularly the price of a Cadillac. Simple linear regression would just use the mileage of the vehicle to predict the price. This will probably not be very successful as different makes of Cadillacs vary widely in their prices. However, if we include other explanatory variables in our model, like model of the vehicle, we should be able to do very well at predicting the price of a particular vehicle. (Certainly other variables like the number of doors, engine size, automatic or manual transmission and so on could also be valuable explanatory variables.)</p>
+</div>
+<p><br /></p>
 <h4 id="interpretation">Interpretation</h4>
 <p>The only change to interpretation from the simple linear regression model is that each coefficient, <span class="math inline">\(\beta_j\)</span> <span class="math inline">\(j=1,\ldots,p\)</span>, represents the change in the <span class="math inline">\(E\{Y\}\)</span> for a unit change in <span class="math inline">\(X_j\)</span>, <em>holding all other variables constant.</em></p>
 <p><br /></p>
@@ -1571,7 +2302,7 @@ curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
 <table width="90%">
 <tr>
 <td with="15%">
-<img src="LinearRegression_files/figure-html/unnamed-chunk-21-1.png" width="144" />
+<img src="LinearRegression_files/figure-html/unnamed-chunk-33-1.png" width="144" />
 </td>
 <td width="75%">
 <p>Let <span class="math inline">\(X_{new}\)</span> be a new explanatory variable that could be added to the current multiple regression model. Plotting the residuals from the current linear regression against <span class="math inline">\(X_{new}\)</span> allows us to determine if <span class="math inline">\(X_{new}\)</span> has any information to add to the current model. If there is a trend in the plot, then <span class="math inline">\(X_{new}\)</span> should be added to the model. If there is no trend in the plot, then the <span class="math inline">\(X_{new}\)</span> should be left out.</p>
@@ -1590,7 +2321,7 @@ curve(b[1] + b[2]*x^2, add=TRUE, col=&quot;green&quot;, lwd=2)</code></pre>
 </ul>
 <p>The left column of plots below show scenarios where the new explanatory variable should be included in the model. The right column of plots show scenarios where the new explanatory variable should not be included in the model.</p>
 </div>
-<p><img src="LinearRegression_files/figure-html/unnamed-chunk-22-1.png" width="672" /><img src="LinearRegression_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+<p><img src="LinearRegression_files/figure-html/unnamed-chunk-34-1.png" width="672" /><img src="LinearRegression_files/figure-html/unnamed-chunk-34-2.png" width="672" /></p>
 </div>
 <p><br /></p>
 <h4 id="infModelParam">Inference for the Model Parameters</h4>
