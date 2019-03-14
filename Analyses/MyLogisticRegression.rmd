@@ -17,4 +17,6 @@ in your Console to see available datasets in R that you could use for this Analy
 ```{r, include=FALSE}
 library(mosaic)
 library(ResourceSelection) 
+
+earnings <- read.csv('./Data/AppleEarnings.csv')
 ```

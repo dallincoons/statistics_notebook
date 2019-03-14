@@ -68,15 +68,22 @@ library(DT)
 library(pander)
 library(readr)
 
-original_butterflies <- read_csv("../Data/expected-move-butterfly-4.csv")
 
-butterflies <- read_csv("../Data/expected-move-butterfly-4.csv") %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitUpper, ClosingDebitUpper, LowerResult, UpperResult, CombinedResult, Volatility)) %>% mutate(Placement = ifelse(ClosingDebitUpper == 0, 'lower', 'upper'), Profit = ifelse(ClosingDebitUpper == 0, LowerResult, UpperResult))
+original_butterflies <- read_csv("../Data/expected-move-butterfly-5.csv")
 
-combinedResults <- butterflies %>% select(c(CombinedResult, Volatility)) %>% mutate(Placement = 'combined') %>% rename(Profit = CombinedResult)
+butterflies <- original_butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low'))
 
-butterflies <- butterflies %>% select(c(Placement, Profit, Volatility))
+upper_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitUpper, UpperResult, Volatility)) %>% mutate(Placement = 'upper', Profit = UpperResult) %>% select(c(Placement, Profit, Volatility))
 
-butterflies <- rbind(butterflies, combinedResults)
+lower_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitLower, LowerResult, Volatility)) %>% mutate(Placement = 'lower', Profit = LowerResult) %>% select(c(Placement, Profit, Volatility))
+
+combined_results <- butterflies %>% mutate(Placement = 'combined') %>% select(c(Placement, CombinedResult, Volatility)) %>% rename(Profit = CombinedResult)
+
+butterflies = c()
+
+butterflies <- rbind(butterflies, combined_results)
+butterflies <- rbind(butterflies, upper_result)
+butterflies <- rbind(butterflies, lower_result)
 
 butterflies.aov <- aov(Profit ~ Placement + Volatility + Placement:Volatility, data=butterflies)
 
