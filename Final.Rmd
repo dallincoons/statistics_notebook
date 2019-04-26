@@ -1,0 +1,32 @@
+---
+  title: "Analysis Rubric"
+output: 
+  html_document:
+  theme: cerulean
+---
+
+```{r}
+library(car)
+
+library(mosaic)
+
+library(tidyverse)
+
+
+humans <- filter(starwars, species == 'Human')
+
+
+height.test <- t.test(height ~ gender, data = humans, mu = 0, alternative = "two.sided", conf.level = .95)
+
+
+mylm <- lm(volume ~ cloudcover, data=RailTrail)
+plot(volume ~ cloudcover, data=RailTrail)
+
+salary.aov <- aov(salary ~ rank + discipline + rank:discipline, data=Salaries)
+
+marriage.glm <- glm(prevcount > 0 ~ age, data=Marriage, family=binomial)
+
+race.ml <- lm(time ~ age + as.factor(sex) + age:as.factor(sex), data=TenMileRace)
+
+davis.males <- filter(Davis, sex == 'M') %>% mutate(difference = weight - repwt)
+```

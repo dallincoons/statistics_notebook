@@ -324,7 +324,7 @@ set.seed(101) #Allows us to always get the same "random" sample
 
   n <- 30 #set the sample size
 
-  X_i <- runif(n, 15, 45) #Gives n random values from a uniform distribution between 15 to 45.
+  X_i <- runif(n, 15, 15.1) #Gives n random values from a uniform distribution between 15 to 45.
 
   beta0 <- 3 #Our choice for the y-intercept. 
 

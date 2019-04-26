@@ -1,0 +1,46 @@
+---
+title: "Permutation"
+output: html_document
+---
+
+```{r}
+mtcars_cyl <- mtcars %>% filter(cyl != 6)
+mtcars.test <- t.test(wt ~ cyl, data=mtcars_cyl, mu=0, alternative="two.sided")
+observedTestStat <- mtcars.test$statistic
+
+N <- 2000
+permutedTestStats <- rep(NA, N)
+for (i in  1:N){
+  permutedData <- sample(mtcars_cyl$cyl)
+  mtcars.perm.test <- t.test(wt ~ permutedData, data=mtcars_cyl, mu=0, alternative="two.sided")
+  permutedTestStats[i] <- mtcars.perm.test$statistic
+}
+```
+
+```{r}
+myTest <- aov(price ~ clarity, data=diamonds)
+observedTestStat <- summary(myTest)[[1]]$`F value`[1]
+
+N <- 100
+permutedTestStats <- rep(NA, N)
+for (i in  1:N){
+  permutedData <- sample(diamonds$clarity)
+  permutedTest <- aov(price ~ permutedData, data=diamonds)
+  permutedTestStats[i] <- summary(permutedTest)[[1]]$`F value`[1]
+}
+hist(permutedTestStats)
+abline(v=observedTestStat)
+```
+
+```{r}
+myTest <- glm((sat > 1000) ~ expend, data=SAT, family=binomial)
+observedTestStat <- summary(myTest)[[12]][2,3]
+N <- 100      
+permutedTestStats <- rep(NA, N)
+for (i in  1:N){
+  permutedData <-  sample(SAT$expend)
+  permutedTest <- glm((sat > 1000) ~ permutedData, data=SAT, family=binomial)
+  permutedTestStats[i] <- summary(permutedTest)[[12]][2,3]
+}
+hist(permutedTestStats)
+```

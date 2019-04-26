@@ -1,0 +1,94 @@
+---
+title: "Uuid as primary key vs auto increment id"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+library(mosaic)
+library(car)
+library(DT)
+library(pander)
+library(readr)
+library(ggplot2)
+
+benchmarks2 <- read_csv("../Data/benchmarks_6.csv")
+
+```
+## Background
+There has been some debate about the implications of using [UUIDs](https://en.wikipedia.org/wiki/Universally_unique_identifier) (Universally Unique Identifier) as primary keys over something like the typical default of auto incrementing IDs. The advantages of UUIDs is that they are safe to consider unique across time and space, making them ideal for distributed systems with more than one database, and potentially hundreds or thousands of databases.
+
+One of the arguments against using UUIDs as primary keys is that indexing is slower than auto incrementing IDs because UUIDs have no predictable pattern to them, so a typical indexing strategy like BTREE which needs to order the values will take longer when inserting new records because it takes longer to find where the UUID should be inserted in relation to the others.
+
+I've seen several [benchmark studies](http://kccoder.com/mysql/uuid-vs-int-insert-performance/) in which thousands or even millions of rows are inserted all at once, and the results show that the UUID is a clear loser in that situation. However I thought it would be more realistic to test against one insert at a time, since most of the time that's the more likely scenario in the life of a typical application, at least in the systems I've worked on.
+
+My question is: Do single row insertions take more time when using UUIDs as a primary key than using a simple auto incrementing ID?
+
+## Findings
+
+I added records to a MySql database in increment of 500,000 all the way up to 4,000,000 records and at each increment I added 5 rows and recorded the runtime of the query for each insertion. I did this for two database tables, one which used an auto incrementing ID for the primary key, and another table that used a UUID as a primary key, both using a standard BTREE index.
+
+As a result of my study I determined that there is <em>not</em> sufficient evidence to suggest UUID insertion time increases significantly faster than auto increment insertion time as the number of records increases. Additionally there is no evidence to say that UUID insertion time is greater than IDs when the number of records is zero.
+
+This is of course assuming that rows are being inserted one at a time. There may be other considerations when considering UUIDs as primary keys, such as read query time when dealing with an index, and memory issues since each UUID takes up 16 bytes. 
+
+```{r}
+ggplot(benchmarks2, aes(x = num_records, y = milliseconds, color = factor(type))) +
+geom_point() +
+labs(x="Number of records", y="Milliseconds", color = "Type") +
+geom_abline(aes(intercept=0.6785, slope=2.632e-08, color="id")) +
+geom_abline(aes(intercept=0.67851+0.1187, slope=2.632e-08+2.698e-08, color="uuid")) +
+theme_bw()
+```
+
+```{r}
+ggplot(benchmarks2, aes(x=factor(type), y=milliseconds)) + 
+  geom_boxplot(fill="#FF9999", color="black") +
+  labs(x="Type", y="Milliseconds", title="Insertion times for IDs vs UUIDs")
+```
+
+## Method
+
+I used a multiple linear regression test for this analysis, which can be seen below:
+
+$$
+  \underbrace{Y_i}_{\text{Milliseconds}} = \overbrace{\overbrace{\beta_0}^{\text{Y-int.}}  +    \underbrace{\beta_1}_{\text{Slope}} \overbrace{X_{i1}}^{\text{Number of rows}}}^{\text{Auto Increment Id}} + \overbrace{\underbrace{\beta_2}_{\text{Y-int. change}} \overbrace{X_{i2}}^{\text{1 if Uuid}} + \underbrace{\beta_3}_{\text{change in slope}} \overbrace{X_{i1} X_{i2}}^{\text{Interaction}}}^{\text{Uuid}} + \epsilon_i
+$$
+
+<hr>
+
+$$
+\alpha = .05
+$$
+
+<hr>
+
+```{r}
+mylm <- lm(milliseconds ~ num_records + type + num_records:type, data=benchmarks2)
+
+pander(summary(mylm))
+
+```
+
+The y-intercept is not significant (0.22 > .05) indicating that there isn't evidence to indiecate there is difference between UUIDs and IDs when the number of records is zero.
+
+UUID insertion times have a positive slope in relation to IDs, however it is not significant either (0.5039 > .05), so we don't have evidence to say that UUID performance degrades at a faster rate than IDs.
+
+It should be noted there are a few outliers that could be affecting the regression and could be the cause for some distribution skew. The random pattern in the Residuals Vs Order indicates the observations can be considered indepent.
+
+```{r, message=FALSE, warning=FALSE, fig.height=3}
+par(mfrow=c(1,3))
+plot(mylm, which=1)
+qqPlot(mylm$residuals)
+mtext(side=3,text="Q-Q Plot of Residuals")
+plot(mylm$residuals, type="b")
+mtext(side=3, text="Residuals vs. Order")
+```
+
+## Full Dataset
+
+```{r}
+datatable(benchmarks2)
+```

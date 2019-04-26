@@ -1,0 +1,152 @@
+---
+title: "My Multiple Logistic"
+output: 
+  html_document: 
+    theme: cerulean
+    code_folding: hide
+---
+
+<hr />
+
+```{r, include=FALSE}
+library(pander)
+library(mosaic)
+library(ResourceSelection)
+library(gridExtra)
+
+GSS <- read.table("../Data/GSS2012.csv", sep="\t", header=TRUE)
+
+GSSc <- GSS[, c("VOLMONTH", "age", "sex")]
+GSSc <- filter(GSSc, VOLMONTH %in% c(1,2))
+GSSc <- filter(GSSc, age <= 89)
+
+GSScMale <- filter(GSSc, sex == 1) 
+GSScFemale <- filter(GSSc, sex == 2)
+```
+#### Background
+
+My question is derived from data collected from [The General Social Survey](http://sda.berkeley.edu/sdaweb/analysis/?dataset=gss12), in which repsondents were asked:
+
+<b>In the past month, did you do any volunteer activity through organizations, 
+ that is donate your time and energy not for pay?</b>
+
+I was curious about whether the age and gender of the respondents had any effect on whether or not they volunteered their time within the past month. Thus, my question is:
+
+<b>Can age and gender be used to predict how likely a person is to take advantage of volunteer opportunities?</b>
+
+## Model
+
+The model used in this study is as follows:
+
+$$
+  P(Y_i = 1|\, \overbrace{x_{i1}}^{\text{age}}, \overbrace{x_{i2}}^{\text{gender}}) = \frac{e^{\beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2}}}{1+e^{\beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} }} = \pi_i
+$$
+Where $Y_i = 1$ denotes whether person $i$ volunteered in the past month, and $Y_i = 0$ that person $i$ did not volunteer. $x_{i1}$ represents the age of the individual, and $x_{i2}$ the gender.
+
+$$
+  H_0: \beta_1 = 0 \\
+  H_a: \beta_1 \neq 0
+$$
+
+$$
+  H_0: \beta_2 = 0 \\
+  H_a: \beta_2 \neq 0
+$$
+<hr>
+
+<center>Level of significance</center>
+<center>$\alpha = .05$</center>
+
+<hr>
+
+<b>Gender</b> is represented by the following values:
+
+| Response | Meaning |
+|----------|-------|
+| 1 | Male |
+| 2 | Female |
+
+<b>Age</b> responses range from 18 to 88, with 89 meaning 89 or older.
+
+<hr>
+
+## Inspecting the Data
+
+I thought it would be interesting to see a visual representation of those who volunteered according to gender and age:
+
+```{R}
+plot_male <- ggplot(GSScMale, aes(x = as.factor(VOLMONTH))) +
+  geom_bar(fill = c("skyblue",
+                    "skyblue"), 
+           color = "black") +
+  labs(title = "Number of male volunteers",
+       x = "Response (1 = Volunteered, 2 = Didn't Volunteer)")
+
+plot_female <- ggplot(GSScFemale, aes(x = as.factor(VOLMONTH))) +
+  geom_bar(fill = c("hotpink",
+                    "hotpink"), 
+           color = "black") +
+  labs(title = "Number of female volunteers",
+       x = "Response (1 = Volunteered, 2 = Didn't Volunteer)")
+
+grid.arrange(plot_male, plot_female, ncol = 2)
+```
+
+```{r}
+GSSc$cat_age <- cut(GSSc$age, c(17,30, 50, 70, 90), labels = c('18-30', '31-50', '51-70', '71-90'))
+
+ggplot(GSSc, aes(x = as.factor(cat_age), fill = as.factor(VOLMONTH))) +
+  geom_bar(position = "dodge") + 
+  labs(x = 'Age', title="Volunteers by age group") +
+  scale_fill_discrete(
+    name="Volunteered",
+    labels=c("Yes", "No")
+)
+```
+
+## Results
+
+The results of the logistic regression test can be seen as follows:
+
+```{r}
+
+GSSc.glm <- glm( (VOLMONTH == 1) ~ age + as.factor(sex), data=GSSc, family=binomial)
+pander(summary(GSSc.glm))
+```
+
+<hr>
+
+This tells that age doesn't have a significant impact on how likely a person is to volunteer (.8681 > .05), but gender does (.04393 < .05). The following chart suggests that females are consistently more likely than males to pursue volunteer activities across all age groups.
+
+```{r}
+c <- GSSc.glm$coefficients
+
+palette(c(rgb(.2,.8,.8,0.6),rgb(1,0.75,.79,0.6)))
+
+plot(VOLMONTH == 1 ~ age, data=GSSc, ylab="Probability", col=factor(sex), pch=16, cex=1.2, main="Probability of volunteering by age and gender")
+legend("right", legend = c("Male", "Female"), 
+       lty = 1, col = c("skyblue", "hotpink"),
+       bty = "n")
+
+curve(exp(c[1] + c[2]*x)/(1 + exp(c[1] + c[2]*x)), add=TRUE, col='skyblue', lwd=1.8)
+
+curve(exp(c[1] + c[3] + c[2]*x)/(1 + exp(c[1] + c[3] + c[2]*x)), add=TRUE, col='pink', lwd=1.8)
+```
+
+One important thing to note is the results of the goodness of fit test, telling us whether the logistic regresssion is a good fit for the data:
+```{r}
+pander(hoslem.test(GSSc.glm$y, GSSc.glm$fitted))
+```
+
+Because the p-value (0.03766) is less than the level of significance (.05), we can say that the regression is not a good fit for the data and so unfortunately I have assume the interpretation isn't valid. 
+
+
+## Interpretation
+If the logistic regression _was_ a good fit, this is what I would conclude:
+
+For every one year increase in age, the odds are $e^{-0.0005588}$ = 0.9994414, which basically tells us there is very little change in the probablity of volunteering as people get older. The p-value for age was .8897 which isn't even close to the .05 level.
+
+There does seem to be a significant different between gender, however, as represented by the 0.04289 p-value in the third row. Females are $e^{0.2388}$ or roughly 27 percent more likely than males to take advantage of volunteer opportunities.
+
+It would be interesting to further study if there are certain volunteer oppurtunities that attract a particular gender over another. Something that could add value to this study is which months respondents volunteered their time. Maybe a gender or an age group tends to volunteer differently in December than July, for example.
+

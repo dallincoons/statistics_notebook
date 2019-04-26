@@ -24,8 +24,12 @@ navbar:
           href: Kruskal.html
         - text: "Linear Regression"
           href: LinearRegression.html
-        - text: "Logistical Regression"
+        - text: "Logistic Regression"
           href: LogisticRegression.html
+        - text: "Chi-Squared Test"
+          href: ChiSquaredTests.html
+        - text: "Permutation Tests"
+          href: PermutationTests.html
     - text: "R Help"
       menu:
         - text: "R Commands"

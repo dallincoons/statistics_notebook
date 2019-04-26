@@ -8,15 +8,47 @@ output:
 
 ## Background
 
-Each week the the "expected move" can be calculated using implied volatility from prices from the options market. The S and P 500 index tends to stay within it's expected move roughly 68 percent of the time. The strategy analyzed here involves buying butterflies at the beginning of each week at the edges of the expected move and selling them at the end of the week, since the edges of the expected move tend to act as magnets and it's very common to see markets pause at those levels. 
+Each week the the "expected move" can be calculated using implied volatility from prices of the options market. The S and P 500 index tends to stay within its expected move roughly 68 percent of the time. The strategy analyzed here involves buying butterflies at the beginning of each week at the edges of the expected move and selling them at the end of the week, since the edges of the expected move tend to act as magnets and it's very common to see markets pause at those levels. 
 
-I analyzed the past four years worth of weekly expected moves, from 2015 to 2019, to answer the question: is it more profitable to place butterflies each week on the upper end of the expected move, the lower end of the expected move, or on both the upper and the lower?
+I analyzed the past four years worth of weekly expected moves, from 2015 to 2019, to answer the question: What is more profitable: to place butterflies each week on the upper end of the expected move, the lower end of the expected move, or on both the upper and the lower?
 
 ## Findings
 
-The result of my findings was that for at least the past 4 years, placing butterflies on the upper end of the expected move exclusively is the most profitable strategy. That means if a trader was to place a butterfly only on the upper end every week, they would be more profitable than placing bets on the lower end of the range or placing bets on both the upper and the lower ends.
+The result of my findings is that at least during the last 4 years, there is no significant difference in profitability by changing where butterflies are placed. Additionally there was no correlation found between the level of volatility* and the amount of profitability. Because of that, a trader may as well place butterflies on both the upper and lower ends of the expected move to take advantage of both sides.
 
-Unfortunately there doesn't seem to be a big enough difference between low and high volatility* that could be considered statistically significant. There also wasn't a significant interaction between implied volatility and the placement of butterflies, for example neither the upper nor lower end of the range performs significantly differently in either higher or lower volatilties.
+
+```{r, include=FALSE}
+library(mosaic)
+library(car)
+library(DT)
+library(pander)
+library(readr)
+
+
+original_butterflies <- read_csv("../Data/expected-move-butterfly-5.csv")
+
+butterflies <- original_butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low'))
+
+upper_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitUpper, UpperResult, Volatility)) %>% mutate(Placement = 'upper', Profit = UpperResult) %>% select(c(Placement, Profit, Volatility))
+
+lower_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitLower, LowerResult, Volatility)) %>% mutate(Placement = 'lower', Profit = LowerResult) %>% select(c(Placement, Profit, Volatility))
+
+combined_results <- butterflies %>% mutate(Placement = 'combined') %>% select(c(Placement, CombinedResult, Volatility)) %>% rename(Profit = CombinedResult)
+
+butterflies = c()
+
+butterflies <- rbind(butterflies, combined_results)
+butterflies <- rbind(butterflies, upper_result)
+butterflies <- rbind(butterflies, lower_result)
+
+butterflies.aov <- aov(Profit ~ Placement + Volatility + Placement:Volatility, data=butterflies)
+
+```
+
+Displayed below are statistics based on the upper, lower, and combined (upper and lower). Butterflies placed on the upper end yeild an average profit of about .026, for example, while combined yeilds .05 on average.
+```{r}
+pander(butterflies %>% group_by(Placement) %>% summarise(Minimum = min(Profit), Average = mean(Profit), Maximum = max(Profit)))
+```
 
 *I considered weeks where the expected move was equal to or lower than 3.50 to be low volatility.
 
@@ -61,33 +93,13 @@ $$
 \alpha = 0.05
 $$
 
-```{r, include=FALSE}
-library(mosaic)
-library(car)
-library(DT)
-library(pander)
-library(readr)
+Each row in my dataset represents a trading week where two butterflies were placed. I measured the total profit, the profit just for the upper range, and the profit just for the lower range. I then converted them to the following dataset before running the ANOVA test:
 
 
-original_butterflies <- read_csv("../Data/expected-move-butterfly-5.csv")
-
-butterflies <- original_butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low'))
-
-upper_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitUpper, UpperResult, Volatility)) %>% mutate(Placement = 'upper', Profit = UpperResult) %>% select(c(Placement, Profit, Volatility))
-
-lower_result <- butterflies %>% mutate(Volatility = ifelse(ExpectedMove > 3.5, 'high', 'low')) %>% select(c(ClosingDebitLower, LowerResult, Volatility)) %>% mutate(Placement = 'lower', Profit = LowerResult) %>% select(c(Placement, Profit, Volatility))
-
-combined_results <- butterflies %>% mutate(Placement = 'combined') %>% select(c(Placement, CombinedResult, Volatility)) %>% rename(Profit = CombinedResult)
-
-butterflies = c()
-
-butterflies <- rbind(butterflies, combined_results)
-butterflies <- rbind(butterflies, upper_result)
-butterflies <- rbind(butterflies, lower_result)
-
-butterflies.aov <- aov(Profit ~ Placement + Volatility + Placement:Volatility, data=butterflies)
-
+```{r}
+datatable(butterflies)
 ```
+
 
 ```{r}
 pander(summary(butterflies.aov))
@@ -99,7 +111,7 @@ xyplot(Profit ~ as.factor(Volatility), data=butterflies, type=c("p", "a"), xlab=
 xyplot(Profit ~ as.factor(Placement), data=butterflies, groups=Volatility, type=c("p", "a"), auto.key=list(corner=c(1,1)), xlab="Placement", main="Interaction between volatility and placement")
 ```
 
-There is some very heavy skew that presents itself in the Q-Q plot. We do have a large enough sample size that this isn't too much of a concern. There may be some concerns with constant variance but I don't believe it's enough to discredit the analysis.
+There is some very heavy skew that presents itself in the Q-Q plot. We do have a large enough sample size so that this isn't too much of a concern. There may be some concerns with constant variance but I don't believe it's enough to discredit the analysis.
 
 ```{r}
 par(mfrow=c(1,2))
@@ -111,4 +123,32 @@ plot(butterflies.aov, which=1:2, pch=16)
 datatable(original_butterflies)
 ```
 
+```{r}
+set.seed(121)
+sample1 <- rnorm(30, 185, 8)
+sample2 <- sample1 - rnorm(30, 0, 3.5)
+theData <- data.frame(values = c(sample1,sample2), group = rep(c(1,2), each=30), id = rep(c(1:30),times=2))
+View(theData)
+with(theData, hist(values[group==1] - values[group==2]))
 
+ 
+
+# Perform the permutation test:
+
+myTest <- t.test(values ~ group, data = theData, paired = TRUE, mu = 0)
+observedTestStat <- myTest$statistic
+
+ 
+
+N <- 2000      
+permutedTestStats <-  rep(NA, N)
+for  (i in 1:N ) {
+   permutedData <- sample(x=c(1,-1), size=30,replace=TRUE)
+   permutedTest <- with(theData, t.test(permutedData*(values[group==1] - values[group==2]), mu=0))
+   permutedTestStats[i]  <-  permutedTest$statistic
+}
+hist(permutedTestStats)
+abline(v=observedTestStat)
+sum(permutedTestStats >= observedTestStat)/N
+sum(permutedTestStats <= observedTestStat)/N
+```

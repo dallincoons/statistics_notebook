@@ -224,7 +224,13 @@ $(document).ready(function () {
       <a href="LinearRegression.html">Linear Regression</a>
     </li>
     <li>
-      <a href="LogisticRegression.html">Logistical Regression</a>
+      <a href="LogisticRegression.html">Logistic Regression</a>
+    </li>
+    <li>
+      <a href="ChiSquaredTests.html">Chi-Squared Test</a>
+    </li>
+    <li>
+      <a href="PermutationTests.html">Permutation Tests</a>
     </li>
   </ul>
 </li>
@@ -292,7 +298,6 @@ $(document).ready(function () {
 
 <p><br></p>
 <hr />
-<p>Customize this page and any of the Math 325 Notebook so that it becomes a useful <em>Guide to Statistical Analysis</em> for your <em>current</em> and <em>future</em> self.</p>
 <!-- This is how to comment text out. You can comment out the above instructions if you wish. Comments allow the text to remain in the Rmd file, but not be displayed in the html file. -->
 <p><a href="RMarkdownHints.html">Customization Help</a></p>
 <hr />
@@ -302,10 +307,10 @@ $(document).ready(function () {
 <div style="padding-left:125px;">
 <p><strong>1 Quantitative Variable</strong></p>
 <p>Quantatative variables are measured on a numeric scale. An example would be like height or weight. In addition to being numeric, it should make sense to perform arithmetic on this type of data. For example, a phone number is numeric but it wouldn’t make sense to take the mean of a list of phone numbers, so that’s an inidication you’re not dealing with quantative data.</p>
-<p>A <a href="GraphicalSummaries.html">histogram</a> is a good visualization tool for this type of data. Other examples are <a href="GraphicalSummaries.html">Boxplot, or Dotplot</a></p>
+<p>A <a href="GraphicalSummaries.html">histogram or barchart</a> is a good visualization tool for this type of data.</p>
 <p>Good numerical summaries to use are <a href="NumericalSummaries.html">median, five-number summary</a></p>
 <p><a href="NumericalSummaries.html">Mean</a> and <a href="NumericalSummaries.html#standard-deviation">standard deviation</a> are great if this is normally distrubuted.</p>
-<p>Examples of tests that are a good match for this type of data are <a href="tTests.html">One Sample t Test</a> and <a href="WilcoxonTests.html">Signed-Rank Wilcoxon Test</a></p>
+<p>Examples of tests that are a good match for this type of data are <a href="Analyses/SleepOneSamplet.html">One Sample t Test</a> and <a href="WilcoxonTests.html">Signed-Rank Wilcoxon Test</a></p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -319,10 +324,13 @@ $(document).ready(function () {
 <p><strong>1 Quantitative Variable | 2 Groups</strong></p>
 <p>Y is the data that we’re interested in learning more about</p>
 <p>X is the explanatory varable which gives greater context to Y</p>
-<p>For example, if we want to study how many chocolate bars people ate in a year according to gender, the number of chocolate bars would be the numeric variable we’re interested in, and the gender is the category or the variable that gives us more context.</p>
+<p>For example, if we want to study how many chocolate bars people ate in a year according to gender, the number of chocolate bars would be the numeric variable we’re interested in, and the gender is the category or the variable that gives us more context. In this case we might run an <a href="tTests.html">Independent samples t-test</a> where one group is number of chocolate bars eaten by males, and the other group is the number of bars eaten by females.</p>
 <p><a href="GraphicalSummaries.html#Scatterplots">Scatterplots</a> or <a href="GraphicalSummaries.html#DotPlots">dot plots</a> could be good for this type of data.</p>
 <p>Examaple of a test you would use with this type of data is <a href="tTests.html">Independent samples t-test</a> or <a href="WilcoxonTests.html">Wilcoxon Rank Sum</a></p>
 <p>One of the most common tests with this type of data is the t-test, but it requires normal data or a large sample size, so if sample size is small and not normal, or if you’re working with ordered, quantatative data, a <a href="WilcoxonTests.html">Wilcoxon Rank Sum</a> test is an option to consider. A <a href="WilcoxonTests.html">Signed-Rank Wilcoxon Test</a> could also be used for paired data.</p>
+<p>An example of a barplot would be something like:</p>
+<pre class="r"><code>boxplot(length ~ sex, data=KidsFeet)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -334,7 +342,7 @@ $(document).ready(function () {
 </div>
 <div style="padding-left:125px;">
 <p><strong>1 Quantitative Variable | 3+ Groups</strong></p>
-<p>Like 2 group Quantitative Variable but with more groups</p>
+<p>Like 2 group Quantitative Variable but with more groups. For example, if we wanted to test to see if there is a day of the week that is more busy than another day, we could collect the number of visits for each day of the week, which would give us 7 groups of quantatative variables. We could then run something like an <a href="ANOVA.html">Anova</a> test to see if one of the days tends to have a different number of visits than the others.</p>
 <p><a href="GraphicalSummaries.html">Box plot</a> is good for this type of data.</p>
 <p>Example of tests to use are <a href="ANOVA.html">Anova</a> or <a href="Kruskal.html">Kruskal-Wallis Rank Sum</a></p>
 <p>A Kruskal-Wallis Rank Sum is a good option to consider for ordered quantatative data and/or data that is not normal. Otherwise, for normal, qualatative data, Anova would be appropriate.</p>
@@ -350,7 +358,26 @@ $(document).ready(function () {
 <div style="padding-left:125px;">
 <!-- Add your customizations in the area below: -->
 <p><strong>2 Quantitative Variables</strong></p>
-<p>With this type of data, often we’re interested in discovering which quantatative variables have an effect on another quantatative variable. For example, if you wanted to find out how much taller a person is likely to be based on their shoe size, height and soe size would be X and Y. A test that can be used in this case could be a <a href="LinearRegression.html">Single Linear Regression</a>.</p>
+<p>With this type of data, often we’re interested in discovering which quantatative variables have an effect on another quantatative variable. For example, if you wanted to find out how much taller a person is likely to be based on their shoe size, height and shoe size could be X and Y. A test that can be used in this case could be a <a href="LinearRegression.html">Single Linear Regression</a>.</p>
+<p>A visual example of this type of data would be human feet measured by length and width.</p>
+<pre class="r"><code>plot(length ~ width, data=KidsFeet)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>pander(KidsFeet %&gt;% summarise(cor(width, length)))</code></pre>
+<table style="width:28%;">
+<colgroup>
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">cor(width, length)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">0.6411</td>
+</tr>
+</tbody>
+</table>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -363,7 +390,7 @@ $(document).ready(function () {
 <div style="padding-left:125px;">
 <!-- Add your customizations in the area below: -->
 <p><strong>1 Quantitative Response | Multiple Explanatory Variables</strong></p>
-<p>This would involve a response variable with 2 or more explanatory variables. Building on the example from the 2 Quantative Variables section, this could involve including weight as well as shoe size to predict a persons height. <a href="LinearRegression.html">Multiple Regression</a> is a test that can be used with this type of data.</p>
+<p>This would involve a response variable with 2 or more explanatory variables. Building on the example from the 2 Quantative Variables section, this could involve including weight as well as gender to predict a persons height, or perhaps we want to predict the price of a car given it’s model and mileage. <a href="LinearRegression.html">Multiple Regression</a> is a test that can be used with this type of data.</p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -377,6 +404,8 @@ $(document).ready(function () {
 <!-- Add your customizations in the area below: -->
 <p><strong>Binomial Response | 1 Explanatory Variable</strong></p>
 <p>X is the explanatory variable, Y is the response, so that we’re predicting where Y will be in relation to 1 or 0 depending on where X is. For example, if we want to predict whether an O-ring will fail or not based on the temperature, this would be a binary response - either it fails or it doesn’t.</p>
+<p>Another example of binomial response is determining whether someone is above or below a certain age. Although normally age is quantative, we can turn almost anything into a binomial response. In this case age would be the Y variable and X might be another attribute like height.</p>
+<p>An example of a test that works with binomial response using multiple explanatory variables is a <a href="LogisticRegression.html">logistic regression</a></p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -389,6 +418,9 @@ $(document).ready(function () {
 <div style="padding-left:125px;">
 <!-- Add your customizations in the area below: -->
 <p><strong>Binomial Response | Multiple Explanatory Variables</strong></p>
+<p>We might have multiple X explanatory variables that are useful in predicting the response variable Y.</p>
+<p>For example if we want to predict whether a person is above or below a certain age (response variable, Y), we could use multiple X explanatory variables such as height, or facial hair.</p>
+<p>An example of a test that works with binomial response using multiple explanatory variables is a <a href="LogisticRegression.html">multiple logistic regression</a></p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">
@@ -401,18 +433,30 @@ $(document).ready(function () {
 <div style="padding-left:125px;">
 <!-- Add your customizations in the area below: -->
 <p><strong>2 Qualitative Variables</strong></p>
-<p>library(mosaic)</p>
-<p>library(tidyverse)</p>
-<p>View(KidsFeet)</p>
-<p>KidsFeet %&gt;%</p>
-<p>group_by(sex) %&gt;%</p>
-<p>summarise(min=min(length), Q1=quantile(length, 0.25), median=median(length), Q3=quantile(length, 0.75), max=max(length))</p>
-<p>boxplot(length ~ sex, data=KidsFeet)</p>
-<p>table(KidsFeet$sex)</p>
-<p>barplot(table(KidsFeet$sex))</p>
-<p>KidsFeet %&gt;%</p>
-<p>summarise(cor(width, length))</p>
-<p>plot(length ~ width, data=KidsFeet)</p>
+<p>An example of qualatative variables are the non-numeric attributes found in the KidsFeet dataset such as gender (B/G).</p>
+<p>A Chi-squared</p>
+<pre class="r"><code>pander(table(KidsFeet$sex))</code></pre>
+<table style="width:14%;">
+<colgroup>
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">B</th>
+<th align="center">G</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">20</td>
+<td align="center">19</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>barplot(table(KidsFeet$sex))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>There are many ways you could potentially visualize quantatative data. Here are a few examples:</p>
 <!------------------------------------------------>
 </div>
 <div style="clear:both;">

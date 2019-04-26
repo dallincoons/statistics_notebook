@@ -15,8 +15,94 @@ Hint, run the command
 in your Console to see available datasets in R that you could use for this Analysis. You are also welcome to collect data yourself, or find other available datasets online for this Analysis. Just be careful to not use anyone else's "analysis" for this Analysis. Also, no conducting surveys unless you have IRB approval to do so. -->
 
 ```{r, include=FALSE}
+library(ResourceSelection)
 library(mosaic)
-library(ResourceSelection) 
+library(car)
+library(DT)
+library(pander)
+library(readr)
 
-earnings <- read.csv('./Data/AppleEarnings.csv')
+earnings <- read.csv('../Data/AAPLEarningsData.csv')
+```
+
+## Background 
+
+Every quarter, publicly traded companies such as Apple are required to file and release an earnings report to disclose their finances for that quarter. This has a great impact on investors, but it's hardly obvious how a stock will react after an earnings report.
+
+The goal of this analysis is to test to see if the price of the overall stock market price levels in comparison to an individual stock price has any predictive ability on the reaction of the stock after an earnings report. In this analysis I'll be using Apple, one of the biggest and most widely traded companies. I'll be comparing Apple stock with SPX stock prices, as the SPX stock price is derived from some of the largest publicy traded companies that comprise the S&P 500.
+
+My question can be stated: does the price level of Apple in relation to the SPX at the time of earnings add any predictive insight into whether Apple will go up or down after an earnings report is released?
+
+## Method
+
+We will apply a logistic regression model to try and answer this question.
+
+$$
+  P(Y_i = 1|x_i) = \frac{e^{\beta_0+\beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}} = \pi_i
+$$
+
+* $Y_i = 1$ Apple stock price ended the day after earnings at least one penny higher than the previous day, prior to the earnings release 
+
+* $Y_i = 0$ Apple stock ended the day after earnings at least one penny lower than the previous day, prior to the earnings release 
+
+* $x_i$ The difference between Apple stock and the S&P 500 measured in the difference in year t date price percentage. For example if the S&P 500 was up 5% year to date, and Apple was down 10% year to date, there would be a difference of -15.
+
+Our null hypothesis is that price difference between the S&P 500 index and Apple stock gives us no indication of price performance after earnings.
+
+$$
+  H_0: \beta_1 = 0 \\
+  H_a: \beta_1 \neq 0
+$$
+<hr>
+
+$$
+  \alpha=.05
+$$
+
+```{r}
+earnings.glm <- glm(Up.or.Down == 'Up' ~ Compared, data=earnings, family=binomial)
+pander(summary(earnings.glm))
+```
+<hr>
+
+The logistic regression test give us estimates for $\beta_0$ and $\beta_1$ from our model, which are 0.4633 and -0.001909 respectively.
+
+The p-value (.8887) doesn't come close to the level of significance, and so we can't reject the null, telling us that the stock price before earnings has no significance.
+
+```{r}
+b <- earnings.glm$coefficients
+
+palette(c(rgb(.2,.8,.8,0.8),rgb(.4,0.0,0.0,0.6)))
+
+plot( formula = Up.or.Down == 'Up' ~ Compared, data=earnings, pch=16, cex=1.3, col=as.factor(Up.or.Down), ylab="Probablity of going up or down", xlab="Apple price compared to SPX (YTD)", main="Probablity of Apple going up or down after earnings")
+curve(exp(b[1]-b[2]*x)/(1+exp(b[1]+-b[2]*x)), add=TRUE, col='skyblue', lwd=2)
+```
+
+It's important to check whether the test is a good fit for the data. This will be done using the Hosmer Lemeshow goodness of fit test. This test takes the form of a hypothesis test where the null hypothesis is that the regression is a good fit and the alternative is that it isn't.
+
+```{r}
+pander(hoslem.test(earnings.glm$y, earnings.glm$fitted, g=6))
+```
+
+Since the p-value .8176 is greater than $a=.05$, we don't have sufficient evidence to reject the null hypothesis, and so can conclude the regression is a good fit.
+
+## Interpretation
+From the results of this analysis, I believe it's safe to assume that if there is a way to predict the movement of a stock price post-earnings, relative position of the stock to the market index isn't it. Financial markets are notorious for being wild and erratic on a day to day basis, and the results aren't terribly surprising. Perhaps a follow up study could be to test whether price movement after earnings is influenced by extremes in prior price movement either up or down, for example if a stock is up 100% year to date, is it more likely to go down after earnings?
+
+```{r}
+datatable(earnings)
+```
+
+```{r, include=FALSE}
+# swim.glm <- glm(!is.na(Medal) ~ Height + Sex, data = swim2012, family=binomial)
+# summary(swim.glm)
+
+# palette(c(rgb(.9333, .1725, 0.1725, .2),rgb(.1098, .5255, .9333, .2)))
+# plot( !is.na(Medal) ~ Height, data=swim2012, cex=0.5, pch=16, col=as.factor(Sex))
+# curve(exp(-17.78995 + 0.09032*x)/(1+exp(-17.78995 + 0.09032*x)), add=TRUE, col='firebrick')
+# curve(exp(-17.78995 - 1.1503 + 0.09032*x)/(1+exp(-17.78995 + 0.09032*x)), add=TRUE, col='dodgerblue')
+# legend('left', legend=c("Female", "Male"), lty=1, color="firebrick", "dogerblue", bty="n")
+# predict(swim.glm, data.frame(Height=180, Sex="M"), type="response")
+# predict(swim.glm, data.frame(Height=180, Sex="F"), type="response")
+
 ```

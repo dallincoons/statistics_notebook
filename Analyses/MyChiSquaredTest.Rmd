@@ -1,0 +1,77 @@
+---
+title: "Chi Squared Test"
+output: 
+  html_document: 
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+library(pander)
+library(mosaic)
+library("RColorBrewer")
+```
+My question is derived from data collected from [The General Social Survey](http://sda.berkeley.edu/sdaweb/analysis/?dataset=gss12), in which repsondents were asked the two questions:
+
+<b>About how often do you pray?</b> and <b>Do you ever read a horoscope or your personal astrology report?</b>
+
+My question for this study is:
+
+<b>Is a person's prayer habits associated with an interest in astrology?</b>
+
+$$
+H_0 : \text{Prayer habits are not associated with an interest in astrology}
+$$
+$$
+H_a : \text{Prayer habits are associated with an interest in astrology}
+$$
+<hr>
+$$
+\alpha = .05
+$$
+<hr>
+
+```{r}
+GSS <- read.table("../Data/GSS2012.csv", sep="\t", header=TRUE)
+
+pray.astrology <- GSS[, c("pray", "astrolgy")]
+pray.astrology <- filter(pray.astrology, pray %in% c(1,2,3,4,5,6))
+pray.astrology$prayer_level <- cut(pray.astrology$pray, c(0,2,4,6), labels=c('Pray Often', 'Pray Sometimes', 'Pray Rarely'))
+pray.astrology <- pray.astrology[, c("prayer_level", "astrolgy")]
+pray.astrology <- filter(pray.astrology, astrolgy %in% c(1,2))
+
+
+pray.astrology.table <- table(pray.astrology)
+
+chi <- chisq.test(pray.astrology.table)
+```
+
+The following chart shows the level of prayer between those who are interested in astrology and those who are not. 
+
+```{r}
+barplot(pray.astrology.table, beside=TRUE, legend.text=TRUE, names.arg=c("Astrology", "No Astrology"), col=brewer.pal(n=3, name="Pastel1"))
+```
+The shapes of the bars look fairly similar between Astrology and No Astrology, though it looks like there are more people who rarely pray in the No Astrology camp.
+
+The results of the Chi Square test indicate there is not a significant relationship, in other words, whether someone is or is not interested in horoscopes and astrology does not give us any insights into how often they are likely to pray. We would consider the two interests to be indepedent of each other.
+
+```{r}
+pander(chi)
+```
+
+To check for the validity of this test, all expected counts need to be above five, which they are. (1 represents astrology people, 2 represents non-astrology people)
+
+```{r}
+pander(pray.astrology.table > 5)
+```
+
+Because there wasn't enough evidence to warrant rejecting the null hypothesis, the residuals don't mean much, but here are the residuals anyway. Those who have an interest in astrology seem to 'pray sometimes' more than expected and 'pray rarely' less than expected. The opposite is true for those not interested in astrology, the number of people who 'pray rarely' are more than expected, and 'pray sometimes' is less. 
+
+
+```{r}
+pander(chi$residuals)
+```
+
+## Interpretation
+While there was no evidence to say whether astrology and prayer are associated, there was an interesting trend that showed up in the charts and analysis, in that people who pray less potentially gravitate to astrology more, however since we can't say the statistics necessarily support that idea. It might be interesting to do a study on only those people who consider themselves atheists or otherwise non-religious people to see if there are any trends toward other forms of spirituality and mysticism.
+
