@@ -1,0 +1,50 @@
+---
+title: "Corlla Regression"
+output:
+word_document: default
+pdf_document: default
+html_document: default
+date: "May 11, 2019"
+---
+
+```{r, include=FALSE}
+library(stats)
+library(mosaic)
+library(tidyverse)
+library(DT)
+library(plotly)
+library(pander)
+library(car)
+corp <- read.csv("../Data/corp.csv", header=TRUE)
+```
+
+## Background
+
+I have no idea why my data variables don't work in either app or simple markdown file so I apologize for the text file.
+
+## Analysis
+
+Given a R^2 of .7279, I was surprised at the somewhat strong trend of Pricing based on Mileage.
+Plotting my regression led me to think that I needed to trasnform it based on the assumptions(*listed at the bottom*).
+I would say that there is constant variance and some independent error terms but not much linearity or normal error terms.
+
+```{r}
+corplm<-lm(Price~Mileage,data=corp)
+plot(Price~Mileage,data=corp)
+abline(corplm)
+summary(corplm)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+summary(corplm)
+```
+
+## Assumptions
+
+```{r}
+plot(corplm)
+```

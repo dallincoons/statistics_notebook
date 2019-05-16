@@ -81,6 +81,40 @@
 
 
 
+.tooltiprout {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltiprout .tooltiprouttext {
+    display: none;
+    width: 200px;
+    background-color: darkgray;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: 0px;
+}
+
+.tooltiprout:hover .tooltiprouttext {
+    display: block;
+}
+
+.tooltiprout:hover {
+    background-color: #888888;
+    color: #f3f3f3;
+    border-radius: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
 /* Style the tab */
 .tab {
     overflow: hidden;
@@ -118,3 +152,94 @@
     border-top: none;
 }
 
+
+.expand-caption {
+   font-size: .8em;
+   color: darkgray;
+   padding-left: 60px;
+}
+
+
+/* This text is in Monaco */
+.rconsole { 
+	font-family: monaco,Consolas,Lucida Console,monospace; 
+	font-size: .7em;
+}
+
+
+
+.fancytable {
+  width: 100%;
+}
+
+.fancytable th {
+  border-bottom:1px solid #ddd;
+  padding: 12px;
+}
+
+.fancytable td {
+  padding:12px;
+  vertical-align: top;
+}
+
+
+
+
+
+
+.tooltiprbold {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltiprbold .tooltiprtext {
+    display: none;
+    width: 200px;
+    background-color: gray;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -170px;
+}
+
+.tooltiprbold:hover .tooltiprtext {
+    display: block;
+}
+
+.tooltiprbold:hover {
+    background-color: #585858;
+    color: #f2f2f2;
+    border-radius: 6px;
+}
+
+
+
+
+
+.tooltiprbold .tooltipRtext {
+    display: none;
+    width: 200px;
+    background-color: gray;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: 0px;
+}
+
+.tooltiprbold:hover .tooltipRtext {
+    display: block;
+}

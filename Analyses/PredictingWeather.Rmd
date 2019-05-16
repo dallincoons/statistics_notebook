@@ -1,0 +1,115 @@
+---
+title: "Predicting the Weather"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+library(mosaic)
+library(car)
+library(DT)
+library(pander)
+library(readr)
+library(ggplot2)
+
+
+weather <- read_csv("../Data/weather.csv")
+```
+## Background
+
+The goal of this analysis is to predict the high temperature for April 29, 2019 using a simple linear regression model from the [Byu-Idaho Weather](http://web.byui.edu/Weather/Data/20178/4) dataset.
+
+In order to predict the high temperature, I simply used as my explanatory variable the mean of temperature highs for April 23rd through the 27th for ever year from 1987 to 2017. For my response variable, I used the tempature high on April 29th of each year.
+
+For example, to get my explanatory, or X variable [for the year 1987](http://web.byui.edu/Weather/Data/1987/4), I found that temperatures from April 23rd to 27th were 82, 83, 82, 81, 78 and I recorded the mean, 81.2. For my response, or Y variable for 1987, I took the high temperature of 80. I repeated that process through 2017.
+
+This year, 2019, the 5 day average was 66.6. Using a simple linear regression, I used this value to predict that <b>the high temperature for April 29th, 2019 will be 62.3 degrees Fahrenheit</b>. 
+
+```{r, results='hide'}
+weather.lm <- lm(actual ~ average, data=weather)
+predict(weather.lm, data.frame(average=66.6), type="response")
+```
+
+```{r}
+
+
+ggplot(weather, aes(x = average, y = actual, label=year)) +
+  geom_point(color="steelblue") +
+  geom_point(aes(x=66.6, y=62.3, col="red"), show.legend = FALSE) +
+  geom_abline(slope = weather.lm$coefficients[2], intercept=weather.lm$coefficients[1], color="gray") +
+  labs(y = "Temperature Highs for April 29th", x="Prior 5 Day Tempature Average", title = "Predicted temperature for April 29, 2019 is 62.3 degrees (shown in red)") +
+  theme_bw()
+
+```
+
+## Model
+
+The model for the linear regression is:
+
+$$
+\underbrace{{Y_i}}_\text{Temperature high} = \beta_0 + \beta_1\underbrace{{Xi}}_\text{prior 5 Day Mean} + \epsilon_i \quad \text{where} \ \epsilon_i \ \sim N(0, \sigma^2)
+$$
+<hr>
+
+In addition to predicting the weather, I also want to test a couple hypotheses:
+
+The first hypothesis will be for the Y-intercept, which will tell us if the temperature can be expected to be different from 0 if the five day average is also zero. This won't be terribly important for the prediction, but I'm including it for the sake of completeness.
+$$
+   H_0 : \beta_0 = 0
+$$
+$$
+  H_1 : \beta_0 \not= 0
+$$
+<hr>
+The second hypothesis is to tell if the X variable (5 day mean) gives us any insight into the Y variable (High temperature on the 29th). We would prefer to see a signficant relationship, but it won't necessarily invalidate the results of the prediction if it's not. 
+$$
+   H_0 : \beta_1 = 0
+$$
+$$
+  H_1 : \beta_1 \not= 0
+$$
+<hr>
+$$
+\alpha = .05
+$$
+
+```{r}
+
+pander(summary(weather.lm))
+```
+
+I tested whether the mean of tempatures of the 5 day period from April 23rd to the 27th tells us anything meaningful about the incidental temperature on the 29th.
+
+As you can see from the linear regression plot above, it looks like the temperature data points don't follow the regression line very closely, which the residual standard error of 11.08 confirms.
+
+However linear regression test does indicate the slope is significant (.02976 < .05), showing there is a relationship with previous highs. This shows that the average high temperature on the 29th is predictable by the model, even though the actual high temperatures on the 29th still vary dramatically around this average.
+
+The y-intercept wasn't found to be significant so I can assume the temperature is zero when the 5 day mean is zero.
+
+To interpret this relationship, for every increase in the prior 5 day temperature average, the change in average for temputure for April 29th increases by .61 degrees:
+
+$$
+  \underbrace{\hat{Y_i}}_\text{Predicted temperature high} = 21.47 + .61 \ \underbrace{X_1}_\text{5 day mean}
+$$
+
+## {.tabset}
+
+### Diagnostics
+
+Residuals vs Fitted shows resonable constant variance and linear relation. There is some concern with normality, as there looks like there is some skew in the distribution of the data. The Residuals vs Order chart is nice and patternless.
+
+```{r, fig.height=4}
+par(mfrow=c(1,3))
+plot(weather.lm, which=1:2)
+plot(weather.lm$residuals, main="Residuals vs Order", xlab="", ylab="Residuals")
+```
+
+### Full Dataset
+
+```{r}
+datatable(weather)
+```
+
+
