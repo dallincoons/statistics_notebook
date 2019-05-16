@@ -25,6 +25,7 @@ options(scipen=999)
 library(tidyverse)
 library(ggthemes)
 library(pander)
+library(MASS)
 ###----------- EDIT THIS AREA -------------------###
 # Add any other librarys you wish to include.
 
@@ -143,14 +144,12 @@ server <- function(input, output) {
     # and "Mileage" columns.
     
     # Pretend this area is an R-chunk: ```{r}
-    lm1 <- lm(Price ~ Mileage, data=cardata)
     plot(Price ~ Mileage, data=cardata)
     points(pricePurchase ~ milesPurchase, pch=15, cex=2, col="skyblue")
     
-    car.lm.log <- logRegression()
-    curve(exp(car.lm.log$coefficients[1] + car.lm.log$coefficients[2] * x), add=TRUE)
+    curve(exp(logRegression()$coefficients[1] + logRegression()$coefficients[2] * x), add=TRUE)
     
-    predictedSelling <- exp(car.lm.log$coefficients[1] + car.lm.log$coefficients[2]*milesSelling)
+    predictedSelling <- exp(logRegression()$coefficients[1] + logRegression()$coefficients[2]*milesSelling)
     
     points(predictedSelling ~ milesSelling, pch=15, cex=2, col="firebrick")
     
@@ -178,7 +177,7 @@ server <- function(input, output) {
     
     car.lm.log <- logRegression()
     
-    predictedSelling <- exp(car.lm.log$coefficients[1] + car.lm.log$coefficients[2]*milesSelling)
+    predictedSelling <- exp(logRegression()$coefficients[1] + logRegression()$coefficients[2]*milesSelling)
     
     paste('The predicted value of the car with ',
           milesSelling,
@@ -197,7 +196,14 @@ server <- function(input, output) {
     cardata <- getdata()
     ###----------- EDIT THIS AREA -------------------###
     
-    paste("I bought a 2003 Toyota Camry with 80,000 miles for 6800, and according to the regression on the data I collected with a log transform applied, I could sell it at 200,000 miles for $3111 for a loss of $3688")
+    r.squared <- summary(logRegression())$r.squared * 100
+    
+    paste("R squared for this regression is about", truncateDecimals(r.squared, 2), ' which is ', case_when(
+        r.squared > .7 ~ "a nice fit", 
+        r.squared > .4 ~ "an ok fit",
+        r.squared < .4 ~ "not that great of a fit"
+       ))
+    
     
     
     ###----------- END EDIT AREA -------------------###
