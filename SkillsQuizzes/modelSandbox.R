@@ -30,9 +30,9 @@ beta13 <- -.19
 beta14 <- -.02
 beta15 <- 0
 
-beta16 <- -3
-beta17 <- -.6
-beta18 <- -.06
+beta16 <- -10
+beta17 <- -.1
+beta18 <- .1
 beta19 <- .0
 
 sigma <- 5
