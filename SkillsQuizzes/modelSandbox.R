@@ -20,7 +20,7 @@ beta5 <- -.5
 beta6 <- .02
 beta7 <- .02
 
-beta8 <- 1.5
+beta8 <- 5
 beta9 <- -.09
 beta10 <- -.18
 beta11 <- .009
@@ -35,7 +35,7 @@ beta17 <- -.6
 beta18 <- -.06
 beta19 <- .0
 
-sigma <- 1
+sigma <- 5
 
 Y <- 
      beta0 + beta1*X1 + beta2*X1^2 + beta3*X1^3 +
