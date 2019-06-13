@@ -1,0 +1,107 @@
+---
+title: "Midterm Decision"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(ggplot2)
+library(car)
+```
+
+
+```{r, warning=FALSE}
+raw_grades <- read.csv('../Data/Math425Grades.csv')
+```
+
+
+To get an initial understanding of the data, I plotted the points with Final Exam as the explanatory variable and Midterm as the response. I  drew a simple regression line to visualize what we're dealing with.
+
+```{r, warning=FALSE}
+simple.lm <- lm(FinalExam ~ Midterm, data = raw_grades)
+
+ggplot(raw_grades, aes(x = Midterm, y = FinalExam)) +
+  geom_point() +
+  geom_abline(intercept = simple.lm$coefficients[1], slope = simple.lm$coefficients[2]) +
+  theme_bw()
+```
+
+The simple regression gives us an r-squared value of `r summary(simple.lm)$r.squared` 
+
+One thing that sticks out immediately are the outliers. There are a few scores at zero or near zero. I have to assume these were people who didn't take the test or didn't try or quit the test early. Neither one of those situations are relavant because I plan on taking the test and giving it some effort, and so I removed those from the data.
+
+```{r}
+grades <- raw_grades %>%
+  filter(FinalExam > 10) %>% 
+  filter(Midterm > 0)
+
+simple.lm <- lm(FinalExam ~ Midterm, data = grades)
+
+b <- coef(simple.lm)
+
+ggplot(grades, aes(x = Midterm, y = FinalExam)) +
+  geom_point() +
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") +
+  theme_bw()
+```
+
+It would also be good to take a peek at the residuals:
+
+```{r}
+par(mfrow=c(1,2), mai=c(1,1,1,.2))
+ plot(simple.lm, which=1:2)
+```
+
+Variance seems constant for the most part, but linearity and normality are a bit questionable. 
+
+The new simple regression gives us a worse r-squared value of `r summary(simple.lm)$r.squared`, and just looking at the plot we can see a group of points with high residuals at the bottom.
+
+At this point I'm thinking maybe there's an additional variable to help explain the variation in final exam scores, so I'll pull up a pairs plot.
+
+```{r}
+pairs(grades, panel = panel.smooth)
+```
+
+Because final exam is the Y variable, I want to look at the row that contains 'FinalExam'. Midterm shows the same plot we were looking at previously. Gender seems like a dud, so the only other potential I possibly see is SkillsQuizzesTotal. However that doesn't seem to be a lot of help either as it seems like most people finished the majority of skills quizzes, regardless of how well they ended up scoring on the exam.
+
+In the next plot I'll add a Loess curve to try and identify if any possible models can 'capture' the data better than a simple regression.
+
+```{r}
+ggplot(grades, aes(x = Midterm, y = FinalExam)) +
+  geom_point() +
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") +
+  geom_smooth(method="loess", span=0.8,
+               se=FALSE, 
+               method.args=list(degree=2)) +
+  theme_bw()
+
+```
+
+It follows the line fairly well and I'm not seeing any obvious pattern.
+
+One last thing I want to try is box-cox to try and identify any possible transformations that can be applied.
+
+```{r}
+boxCox(simple.lm)
+```
+
+It doesn't narrow it down very well but it seems like a log transformation might be a reasonable thing to try.
+
+```{r}
+log.lm <- lm(log(FinalExam) ~ Midterm, data = grades)
+```
+
+Which yields a slightly worse r-squared, `r summary(log.lm)$r.squared`, so it looks like that's a bust.
+
+At this point I'm stuck, and I'm probably missing something, but it's late so I'll wait and see if anyone I critique does something brilliant I didn't think of.
+
+My final model:
+
+$$
+\underbrace{Y_i}_\text{Final Exam score} = \beta_0 +\underbrace{\beta_1X_i}_\text{Midterm score} +\epsilon_i
+$$
+My prediction with a midterm score of 84 is that I'll get a 79.4 on the final, which seems reasonable so I'll keep my midterm score. The prediction interval is 51.84 to 100.
+

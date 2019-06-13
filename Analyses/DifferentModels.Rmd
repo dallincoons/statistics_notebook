@@ -1,0 +1,270 @@
+---
+title: "Different Models"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+
+library(ggplot2)
+library(car)
+library(tidyverse)
+library(Ecdat)
+library(pander)
+
+set.seed(101) #Allows us to always get the same "random" sample
+#Change to a new number to get a new sample
+
+n <- 30 #set the sample sizes
+```
+
+## Background
+
+I've created three different types of regression models with arbitrary parameters of my choosing which I used to generate data around each model. The goa is to create an estimate for each model parameter, and see how close the estimate gets to the 'true' model. 
+
+To do this I chose to plot the true regression using a solid line, and the estimated regression using the dashed line. I also thought it might be interesting to plot a simple linear regression line using dashed gray line and compare the r-squared values with the more complex models to show how proportion of variance explained differs between them.
+
+## Quadratic Model
+
+---
+
+$$
+  Y_i = \beta_0 + \beta_1 X_i + \beta_2X_i^2 + \epsilon_i
+$$
+
+---
+
+The true regression model used to generate the data is 
+
+$E\{Y_i\} = -1000 + 70X_i - 1X_i^2$, represented by the solid blue line.
+
+This was estimated to be 
+
+$\hat{Y_i} = -872.9173 + 60.467X_i - .843X_i^2$, shown using the dotted blue line.
+
+
+```{r}
+X_i <- runif(n, 15, 45)
+#Gives n random values from a uniform distribution between 15 to 45.
+
+beta0 <- -1000 #Our choice for the y-intercept. 
+beta1 <- 70 #Our choice for the slope. 
+beta2 <- -1
+sigma <- 35 #Our choice for the std. deviation of the error terms.
+
+
+epsilon_i <- rnorm(n, 0, sigma)
+#Gives n random values from a normal distribution with mean = 0, st. dev. = sigma.
+
+Y_i <- beta0 + beta1*X_i + beta2*X_i^2 + epsilon_i
+#Create Y using the normal error regression model
+
+fabData <- data.frame(y=Y_i, x=X_i)
+
+#In the real world, we begin with data (like fabData) and try to recover the model that 
+# (we assume) was used to created it.
+
+fab.lm <- lm(y ~ x + I(x^2), data=fabData) #Fit an estimated regression model to the fabData.
+simple.lm <- lm(y ~ x, data=fabData)
+
+b <- coef(fab.lm)
+
+ggplot(fabData) +
+  geom_point(aes(y = y, x = x)) +
+  stat_function(fun = function(x) beta0 + beta1 * x + beta2 * x^2, color = "skyblue") +
+  stat_function(fun = function(x) b[1] + b[2] * x + b[3] * x^2, linetype="dashed", color="skyblue") +
+  geom_abline(intercept = simple.lm$coefficients[1], slope = simple.lm$coefficients[2], color="gray", linetype="dashed") +
+  labs(main = "test") +
+  theme_minimal()
+
+```
+
+| Model   | $R^2$ | Adjusted $R^2$ |
+|---------|-------|----------------|
+| Simple  | `r summary(simple.lm)$r.squared` | `r summary(simple.lm)$adj.r.squared` |
+| Quadratic   | `r summary(fab.lm)$r.squared`|   `r summary(fab.lm)$adj.r.squared`      |
+
+## Two-lines Regression Model
+
+---
+
+$$
+  Y_i = \beta_0 + \beta_1 X_1i + \beta_2X_2i + \beta_3 X_1i X_2i + \epsilon_i
+$$
+
+---
+
+```{r}
+beta0 <- 5 #Our choice for the y-intercept. 
+beta1 <- 35 #Our choice for the slope. 
+sigma <- 250 #Our choice for the std. deviation of the error terms.
+
+beta0_2 <- 10 #Our choice for the y-intercept. 
+beta1_2 <- 65 #Our choice for the slope. 
+sigma_2 <- 150 #Our choice for the std. deviation of the error terms.
+
+X_i <- runif(n, 15, 45)
+X_i2 <- runif(n, 15, 45)
+
+epsilon_i <- rnorm(n, 0, sigma) 
+epsilon_i2 <- rnorm(n, 0, sigma_2)
+
+Y_i <- beta0 + beta1*X_i + epsilon_i
+Y_i2 <- beta0_2 + beta1_2*X_i2 + epsilon_i2
+
+fabData <- data.frame(y=Y_i, x=X_i, type='one')
+fabData <- rbind(fabData, data.frame(y=Y_i2, x=X_i2, type='two'))
+
+# plot(y ~ x, data=fabData, col=c("skyblue", "orange")[as.factor(type)], pch=21, cex.main=1)
+
+multi.lm <- lm(y ~ x + type + x:type, data=fabData)
+simple.lm <- lm(y ~ x, data=fabData)
+
+b <- coef(multi.lm)
+
+```
+
+The true model is $E\{Y_i\} = 5 + 35X_1i$, seen by the solid red line, and $\hat{Y_i} = (10 + 5) + (35 + 65)X_i$, seen by the solid blue line.
+
+The estimated models are 
+
+$\hat{Y_i} = `r b[1]` + `r b[2]`X_i$ (dashed red line). 
+
+$\hat{Y_i} = (`r b[1]` + `r b[3]`) + (`r b[2]` + `r b[4]`)X_i$ (dashed blue line)
+
+```{r}
+ggplot(fabData, aes(y = y, x = x, color=as.factor(type))) +
+  geom_point() +
+  labs(color="type") +
+  stat_function(fun = function(x) beta0 + beta1*x, color="red") +
+  stat_function(fun = function(x) b[1] + b[2]*x, linetype="dashed", color="red") +
+  stat_function(fun = function(x) beta0_2 + beta1_2*x) +
+  stat_function(fun = function(x) (b[1] + b[3]) + (b[2] + b[4])*x, linetype="dashed") +
+  geom_abline(intercept = simple.lm$coefficients[1], slope = simple.lm$coefficients[2], color="gray", linetype="dashed") +
+  theme_minimal()
+```
+
+| Model   | $R^2$ | Adjusted $R^2$ |
+|---------|-------|----------------|
+| Simple  | `r summary(simple.lm)$r.squared` | `r summary(simple.lm)$adj.r.squared` |
+| Two-lines   | `r summary(multi.lm)$r.squared`|   `r summary(multi.lm)$adj.r.squared` |
+
+## Cubic Model
+
+---
+
+$$
+  Y_i = \beta_0 + \beta_1 X_i + \beta_2X_i^2 + \beta_3X_i^3 + \epsilon_i
+$$
+
+---
+
+
+```{r}
+set.seed(101) #gives us the same randomness 
+n <- 20 #sample size
+X <- runif(n, -1.5, 2)
+
+beta0 <- 1
+beta1 <- -.1
+beta2 <- 2.5
+beta3 <- .5
+
+Y <- beta0 + beta1*X + beta2*X^2 + beta3*X^3 + rnorm(n, 0, 1)
+
+
+fake.lm <- lm(Y ~ X + I(X^2) + I(X^3), data = data.frame(Y=Y, X=X))
+simple.lm <- lm(Y ~ X, data = data.frame(Y=Y, X=X))
+
+b <- coef(fake.lm)
+```
+True model:
+
+$E\{Y_i\}  = 1 - .1 X_i + 2.5X_i^2 + .5X_i^3 + \epsilon_i$ (solid black line).
+
+Estimated model: 
+
+$Y_i = `r b[1]` + `r b[2]` X_i + `r b[3]`X_i^2 + `r b[4]`X_i^3 + \epsilon_i$ (dashed black line).
+
+```{r}
+plot(Y ~ X, pch=21, col="lightgray", bg="steelblue", ylim=c(-5,22))
+
+fabulousData <- data.frame(y = Y, x = X)
+
+curve(b[1] + b[2] + b[3]*x^2 + b[4]*x^3, add = T)
+curve(beta0 + beta1 + beta2*x^2 + beta3*x^3, add = T, lty = 2)
+abline(simple.lm, lty=2, col="gray", lwd=.8)
+```
+
+| Model   | $R^2$ | Adjusted $R^2$ |
+|---------|-------|----------------|
+| Simple  | `r summary(simple.lm)$r.squared` | `r summary(simple.lm)$adj.r.squared` |
+| Cubic   | `r summary(fake.lm)$r.squared`|   `r summary(fake.lm)$adj.r.squared` |
+
+## Example with real dataset
+
+I used the mtcars dataset to explain miles per gallon using horsepower. I applied a simple, quadratic, and cubic model. Both the cubic and quadratic model seemed to fit the data similarly, and they did a decent job, at least better than the simple regression.
+
+```{r}
+
+wage.cube.lm <- lm(mpg ~ hp + I(hp^2) + I(hp^3), data = mtcars)
+wage.quad.lm <- lm(mpg ~ hp + I(hp^2), data = mtcars)
+wage.simple.lm <- lm(mpg ~ hp, data = mtcars)
+b <- coef(wage.cube.lm)
+b2 <- coef(wage.quad.lm)
+b3 <- coef(wage.simple.lm)
+
+# curve(b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3, add = T)
+# curve(b2[1] + b2[2] * x + b2[3] * x^2, add = T)
+# abline(wage.simple.lm)
+
+ggplot(mtcars, aes(y= mpg, x = hp)) +
+  geom_point() +
+  stat_function(fun = function(x) b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3, color="firebrick") +
+  stat_function(fun = function(x) b2[1] + b2[2] * x + b2[3] * x^2, color="skyblue") +
+  stat_function(fun = function(x) b3[1] + b3[2] * x, color="gray") +
+  labs(title = "Quadratic and Cubic models perform about the same but better than simple regression model") +
+  theme_bw()
+```
+
+<b>Quadratic model:</b>
+
+$\hat{Y_i} = -40.21 - 0.2133X_i + .0004208X_i^2$
+
+In the quadratic model the estimate of $\beta_0$, `r wage.quad.lm$coefficients[1]` is the y-intercept, the estimate for $\beta_1$, `r wage.quad.lm$coefficients[2]` will be used to determine where the vertex of the parabola is ($\frac{−\beta_1}{2\cdot\beta_2}$). The estimate for $\beta_2$, 0.0004208 determines which direction the parabola will face and how "steep" it is - larger values make for a steeper parabola.
+
+<b>Cubic model:</b>
+
+$\hat{Y_i} = 44.22 + -0.2945X_i + 0.0009115X_i^2 - 8.701086e-07X_i^3$
+
+In this model, the 44.22 ($\beta_0$) estimate represents the Y-intercept as usual. -0.2945 ($\beta_1$) is not so easily interpreted but can be thought of as contributing to the location of the local minimum and maximum values. 0.0009115 ($\beta_2$) is similar to $\beta_1$. -8.701e-07 ($\beta_3$) determines whether the model is increasing or decreasing depending on it's sign.
+
+<b>Two-line model:</b>
+
+I'll use the same old dataset as everyone else for the two-line model, where an automatic transmission is represented as 0 so that it can cancel out part of the equation and a manual transmission is 1. The big twist is that I'm predicting qsec based on mpg.
+
+```{r}
+m.lm <- lm(qsec ~ mpg + am + mpg:am, data = mtcars)
+
+b <- coef(m.lm)
+
+ggplot(mtcars, aes(x = mpg, y = qsec, colour=as.factor(am))) +
+  geom_point() +
+  stat_function(fun = function(x) b[1] + b[2]*x, color="red") +
+  stat_function(fun = function(x) (b[1] + b[3]) + (b[2] + b[4])*x)
+```
+
+When the transmission is 0, it actas as the baseline using the following model:
+
+$$
+\hat{Y}_i = \overbrace{13.04}^{\stackrel{\text{y-int}}{\text{baseline}}} + \overbrace{0.3}^{\stackrel{\text{slope}}{\text{baseline}}} X_{1i}
+$$
+
+When transmission is 1, we add the difference in y-intercept and slope, which is what $\beta_2$ and $\beta_3$ estimate respectively ($\beta_3$ is known as the "interaction" term), to the baseline y-intercept and slope to get the equation for the second line:
+
+$$
+\hat{Y}_i = \underbrace{(\overbrace{13.04}^{\stackrel{\text{y-int}}{\text{baseline}}} - \overbrace{1.36}^{\stackrel{\text{change in}}{\text{y-int}}})}_{\stackrel{\text{y-intercept}}{11.68}} + \underbrace{(\overbrace{.3}^{\stackrel{\text{slope}}{\text{baseline}}} -  \overbrace{0.07}^{\stackrel{\text{change in}}{\text{slope}}})}_{\stackrel{\text{slope}}{.23}} X_{1i}
+$$
+

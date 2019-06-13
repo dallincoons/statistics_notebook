@@ -26,14 +26,16 @@ laptops <- raw_laptops %>%
 ram.lm <- lm(Price_euros ~ numeric_ram, data = laptops)
 ```
 
-The regression line, or $\hat{Y}$, represents the rate of change in Y as X changes. In other words, for every X value, there is a corresponding average for Y. For example, the regression below represents the change in the average price (Y) of a laptop as Ram (X) increases. If we look at laptops with 4 gigabytes of RAM, the placement of the line represents the average price value for laptops with 4 gigabytes of RAM.
+The regression line, or $\hat{Y}_i$, represents the rate of change in the average of Y as X changes, so for every X value, there is a corresponding average for Y which changes as X changes. 
+
+For example, the regression below represents the change in the average price (Y) of a laptop as Ram (X) increases. If we look at laptops with 4 gigabytes of RAM, the placement of the line represents the average price value for laptops with 4 gigabytes of RAM.
 
 ```{r}
 
 ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
-  geom_point(color="steelblue") +
-    geom_point(aes(x=4, y=200, col="red"), show.legend = FALSE) +
-  geom_point(aes(x=4, y=2000, col="green"), show.legend = FALSE) +
+  geom_point(aes(color="steelblue"), show.legend = FALSE) +
+  geom_point(aes(x=4, y=200, col="red"), size = 2.5, show.legend = FALSE) +
+  geom_point(aes(x=4, y=2000, col="green",), size = 2.5, show.legend = FALSE) +
   scale_x_continuous(breaks = seq(2, 32, by = 2)) +
   geom_abline(slope = ram.lm$coefficients[2], intercept=ram.lm$coefficients[1], color="gray") +
   labs(y = "Price (Euros)", x="RAM (Gigabytes)") +
@@ -43,18 +45,15 @@ ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
 
 Obviously, not all laptops with 4 gigabytes of RAM have the same price. Some are above the average, and some below. The numerical representation of how far above or below average the laptop is at that particular point is referred to as a residual. 
 
-For example, based on the data we are using for the regression, the average price for a 4 gigabyte laptop is estimated to be about 676 dollars. If a 4 gigabyte laptop costed 200 dollars, it's residual value would be -476 (represented by a green dot), or you could think of it being 476 dollars below average for laptops with 4 gigabytes of RAM. Similarly, if a 4 gigabyte laptop costs 2000 dollars, it's residual is 1324 (represented as a red dot), or 1324 dollars above average. 
+For example, based on the data we are using for the regression, the average price for a 4 gigabyte laptop is estimated to be about 676 dollars. If a 4 gigabyte laptop costed 200 dollars, it's residual value would be -476 (represented by a green dot), meaning it's 476 dollars below average for laptops with 4 gigabytes of RAM. Similarly, if a 4 gigabyte laptop costs 2000 dollars, it's residual is 1324 (represented as a red dot), or 1324 dollars above average. 
 
 In this way, if you know the number of gigabytes of RAM your computer has and the amount you paid, it's possible to compute a residual which will inform you whether you paid more or less than average.
 
-Just as the regression line is only an estimate of the truth, residuals are only estimates of the true error, or true distance from the regression line.
-
-
 ### SSTO, SSR, and SSE
 
-We want to know how closely correlated our data is, or how closely it fits to the regression. We use r-squared or $R^2$, but in order to calculate that value, first we need to have an understanding of SSTO, SSR, and SEE.
+In order to determine how well the regression line "explains" the data, or how well the data "fits" the regression line, it's very helpful to look at the different measures of variance.
 
-The mean laptop price is plotted with the red line. Most laptops aren't priced using the mean, most are higher or lower. These points all have a number which is how far they deviate from the mean. If we add up all these values we'll get SSTO.
+The average laptop price is plotted with the red line. If we measure the difference of each point from the red line, square each difference and add them up, this will give us SSTO or the Total Sum of Squares.
 
 ```{r}
 
@@ -65,14 +64,14 @@ ggplot(laptops, aes(x = 0, y = Price_euros)) +
   theme_bw()
 ```
 
-In this case the mean of the price is about 1123.69. If a laptop is priced at 3000, it deviates from the mean by about 877 dollars (shown by a red dot). SSTO is calculated by measuring each deviation, squaring eaching deviation value, and summing all deviation values.
+By way of example, the mean of the price is about 1123.69. If a laptop is priced at 3000, it deviates from the mean by about 877 dollars (shown by a red dot). We would then square 877 and add it to all the other 'squared differences'. The result will give us an idea of the total deviation from the mean of Y.
 
 
 ```{r}
 
 ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
   geom_point(color="steelblue") +
-  geom_point(aes(x=4, y=2000, col="firebrick"), show.legend = FALSE) +
+  geom_point(aes(x=4, y=2000, col="firebrick"), size = 2.5, show.legend = FALSE) +
   geom_hline(yintercept=mean(laptops$Price_euros), color="red", linetype="dashed") +
   labs(y = "Price (Euros)", x="RAM (Gigabytes)", main="Price mean shown in red") +
   theme_bw()
@@ -85,7 +84,10 @@ $$
 SSTO = \sum_{i=1}^n (Y_i - \bar{Y})^2
 $$
 
-SSR measures how far the regression line (black line) deviates from the mean (red lines). For laptops with 4 gigabytes of ram, the estimated price according to the regression is about 676 dollars, while the overall mean price for laptops is about 1123.69. Thus, the deviation would be 447 dollars. SSR is calculated by calculating the deviation for each value, squaring each deviation value, and summing them all together.
+SSTO is not terribly helpful to help us determine how well the regression model does to explain the deviation from the mean and ultimately help us make predictions, but we'll see how it is useful when combined with other measurements. Our goal is to find a regression line that the data follows as closely as possible. We want to find a regression model that doesn't have a lot of variance from the regression line.
+The lower the variance, the more confident we can be in our model to help us make future predictions.
+
+The next one we'll look at is SSR, or Sum of Squares regression. SSR measures how far the regression line (black line) deviates from Y's mean (red line). For laptops with 4 gigabytes of ram, the estimated price according to the regression is about 676 dollars, while the overall mean price for laptops is about 1123.69. Thus, the deviation would be 447 dollars. SSR is calculated by taking this difference for each value, squaring them, and summing them all together.
 
 ```{r}
 ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
@@ -96,16 +98,16 @@ ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
   theme_bw()
 ```
 
-Denoting the regression line as $\hat{Y}$ would give us the following formula:
+Denoting the regression line as $\hat{Y}_i$ gives us the following formula for SSR:
 
 $$
-\sum_{i=1}^n (\hat{Y} - \bar{Y})^2
+SSR = \sum_{i=1}^n (\hat{Y}_i - \bar{Y})^2
 $$
 
-SSE is measured by taking all residuals as discussed in the first section, squaring each one and summing them all together. Residuals are deonted as $Y_i$, giving us the formula:
+SSE is measured by taking all residuals as discussed in the first section, squaring each one and summing them all together (remember, the residual is calculated as $Y_i - \hat{Y}_i$), giving us the formula:
 
 $$
-\sum_{i=1}^n (Y_i - \hat{Y})^2
+SSE = \sum_{i=1}^n (Y_i - \hat{Y})^2
 $$
 
 ```{r}
@@ -121,17 +123,17 @@ ggplot(laptops, aes(x = numeric_ram, y = Price_euros)) +
 
 ## R-Squared
 
-We can expect that most datapoints ($Y_i$) will not be exactly average, and there will be some deviation. If a particular value sits right on the regression line, that isn't particularly surprising because the regression line tells us that's where we should expect to see Y values. R squared tells us how suprising the data is, or how much it deviates or doesn't deviate what the regression predicts and therefore what we'd expect. 
+All of this leads us to be able to show how well our regression model explains the variation of the data from the mean. $R^2$ is a more intuitive measure of this over the correlation coefficient $r$ because it's simple to see $R^2$ and tell what percentage of the variation is explained by the model, whereas $r$ is a value from -1 to 1 that's not as easy to decipher the meaning.
 
-The closer to one r-squared is, the closer our data is to the regression line.
+Another way to put it is if the data follows the regression line perfectly, then everything we see is perfectly explainable and we would see an $R^2$ of 1.
 
-R-Squared can be calculated as
+The calculation for this value is
 
-$R^2 = \frac{SSR}{SSTO}$
+$R^2 = \frac{SSR}{SSTO}$ or $R^2 = 1 - \frac{SSE}{SSTO}$
 
-Note that $R^2$ will always be between 1 and 0, because SSR will always be between 0 and SSTO, since SSTO is essentially the combination of SSR and SSE.
+or in plain english, $R^2$ is $\frac{\text{Variation explained by the regression}}{\text{Total Variation}}$ meaning we want to explain as much of the total variation (SSTO) as possible by our regression. Everything left over is variation that we can't explain with the regression model.
 
-For example, the regression we've been using so far, comparing RAM with price, has an R-Squared value of 0.5603. Comparing weight with price has a lower R-Squared of 0.04196, and you  can see that the data does not fit very closely to the regression line:
+For example, the regression we've been using so far, comparing RAM with price, has an $R^2$ value of 0.5603, meaning that 56 percent of the variance of the Y variable can be explained by the regression model. Comparing weight with price has a lower value of 0.04196, and you can see that the data does not fit very well with the regression:
 
 ```{r}
 

@@ -37,7 +37,7 @@ datatable(ccCars)
 A multiple linear regression model was applied to the data to obtain two regression lines, one for each vehicle. To be precise, the (slightly involved) model is given by:
 
 $$
-  \underbrace{Y_i}_{\text{Price}} = \overbrace{\beta_0 + \beta_1 \underbrace{X_{i1}}_{\text{Mileage}}}^{\text{Civic Line}} + \overbrace{\beta_2 \underbrace{X_{i2}}_{\text{1 if Corolla}} + \beta_3 \underbrace{X_{i1} X_{i2}}_{\text{Interaction}}}^{\text{Corolla Adjustments to Line}} + \epsilon_i
+  \underbrace{Y_i}_{\text{Price}} = \overbrace{\beta_0 + \beta_1 \underbrace{X_{i1}}_{\text{Mileage}}}^{\text{Civic Line}} + \overbrace{\beta_2 \underbrace{X_{i2}}_{\text{1 if Corolla}} + \beta_3 \underbrace{X_{i1} X_{i2}}_{\text{Interaction}}}^{\text{Corolla Adjustments to Line}} + \epsilon_is
 $$
 
 where $\epsilon_i\sim N(0,\sigma^2)$ and $X_{i2} = 0$ when the vehicle is a Civic and $X_{i2} = 1$ when the vehicle is a Corolla. This forced 0, 1 encoding for $X_{i2}$ produces the following models.

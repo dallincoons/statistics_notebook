@@ -243,3 +243,13 @@
 .tooltiprbold:hover .tooltipRtext {
     display: block;
 }
+
+
+
+
+
+.note {
+  padding-left: 20px;
+  color: gray;
+  size: .8em;
+}

@@ -1,0 +1,76 @@
+---
+title: "Recovering a True Model"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+p1Data <- read.csv("../data/p1Data.csv", header=TRUE)
+p2Data <- read.csv("../data/p2Data.csv", header=TRUE)
+p3Data <- read.csv("../data/p3Data.csv", header=TRUE)
+```
+
+## Part 1 - Recovering a True Model (Beginner Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+
+## Part 2 - Recovering a True Model (Intermediate Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```
+
+
+
+## Part 3 - Recovering a True Model (Advanced Level)
+
+We believe the true model to be...
+
+$$
+  Y_i = \underbrace{...}_\text{The True Model} + \epsilon_i
+$$
+
+And estimate that model by...
+
+$$
+  \hat{Y}_i = ...
+$$
+
+with our estimate of $\sigma$ as ...
+
+```{r}
+
+```

@@ -81,7 +81,7 @@ ui <- fluidPage(
      column(12,
             align='center',
             textOutput('message1')),
-     style='font-size:30px;border-color:#a1acff;margin:20px;padding:15px;'
+     style='font-size:26px;border-color:#a1acff;margin:20px;padding:15px;'
   ),
   
   tags$br(),
@@ -98,7 +98,7 @@ ui <- fluidPage(
   fluidRow(
     column(12,
            textOutput('analysis')),
-    style='font-size:20px;border-color:#a1acff;margin:20px;padding:15px;'
+    style='font-size:18px;border-color:#a1acff;margin:20px;padding:15px;'
   ),
   
   tags$br(),
@@ -144,14 +144,20 @@ server <- function(input, output) {
     # and "Mileage" columns.
     
     # Pretend this area is an R-chunk: ```{r}
-    plot(Price ~ Mileage, data=cardata)
-    points(pricePurchase ~ milesPurchase, pch=15, cex=2, col="skyblue")
+    plot(Price ~ Mileage, data=cardata, main="Price bought (blue dot) vs Price sold (red dot)")
+    
+    # car.lm.log <- lm(log(Price) ~ Mileage, data=getdata())
     
     curve(exp(logRegression()$coefficients[1] + logRegression()$coefficients[2] * x), add=TRUE)
     
     predictedSelling <- exp(logRegression()$coefficients[1] + logRegression()$coefficients[2]*milesSelling)
     
     points(predictedSelling ~ milesSelling, pch=15, cex=2, col="firebrick")
+    points(pricePurchase ~ milesPurchase, pch=15, cex=2, col="skyblue")
+    
+    predict(logRegression(), newdata = data.frame(Mileage = milesSelling), interval="prediction")
+    
+    abline(h=exp((predict(logRegression(), newdata = data.frame(Mileage = milesSelling), interval="prediction"))), lty=2, lwd = 2, col="skyblue")
     
     legend(1, 95, legend=c("skyblue", "firebrick"),
            col=c("skyblue", "firebrick"), lty=1:2, cex=0.8)
@@ -175,8 +181,6 @@ server <- function(input, output) {
     # You will likely want to use say lm(...) and predict(...) 
     # or other useful codes.
     
-    car.lm.log <- logRegression()
-    
     predictedSelling <- exp(logRegression()$coefficients[1] + logRegression()$coefficients[2]*milesSelling)
     
     paste('The predicted value of the car with ',
@@ -184,8 +188,8 @@ server <- function(input, output) {
           paste(' miles is $', truncateDecimals(predictedSelling, 2)),
           ' which means you drove the vehicle for ',
           milesSelling - milesPurchase,
-          paste(' miles with a net operating', ifelse((pricePurchase - predictedSelling) > 0, 'loss. ', 'gain'),' of', truncateDecimals(abs(pricePurchase - predictedSelling), 2), '. '),
-          paste("This means you'll", ifelse((pricePurchase - predictedSelling) > 0, 'lose', 'gain') , "about $", truncateDecimals(abs(diff(c(pricePurchase, predictedSelling)) / diff(c(milesPurchase, milesSelling))), 2) ,"every mile"),
+          paste(' miles with a net operating', ifelse((pricePurchase - predictedSelling) > 0, 'loss ', 'gain'),' of', truncateDecimals(abs(pricePurchase - predictedSelling), 2), '. '),
+          paste("This means you'll", ifelse((pricePurchase - predictedSelling) > 0, 'lose', 'gain') , "about $", truncateDecimals(abs(diff(c(pricePurchase, predictedSelling)) / diff(c(milesPurchase, milesSelling))), 2) ,"every mile driven."),
           sep='')
     ###----------- END EDIT AREA --------------------###  
   })
@@ -199,20 +203,18 @@ server <- function(input, output) {
     r.squared <- summary(logRegression())$r.squared * 100
     
     paste("R squared for this regression is about", truncateDecimals(r.squared, 2), ' which is ', case_when(
-        r.squared > .7 ~ "a nice fit", 
-        r.squared > .4 ~ "an ok fit",
-        r.squared < .4 ~ "not that great of a fit"
-       ))
-    
-    
+        r.squared > .7 ~ "a nice fit.", 
+        r.squared > .4 ~ "an ok fit.",
+        r.squared < .4 ~ "not that great of a fit."
+       ), "Note that this app uses a transformed linear regession model, using the log transformation. It's possible that that isn't the best model for this data set. In an upcoming feature, we'll be able to attempt to dynamically find the best transformation using the Box-Cox method." , "Take a close look at the residual vs fitted plot below. If there is a smooth slope to it that may be an indication
+       the data provided has issues with linearity, meaning that miles driven doesn't may not explain price as well as we'd like. Additionally we'd also want to see that dots are roughly the same distance through the length of the horizontal dotted line, meaning that data varies from the average price about the same amount as miles driven inceases.")
     
     ###----------- END EDIT AREA -------------------###
   })
   
   output$diagnostic <- renderPlot({
-    cardata <- getdata()
     ###----------- EDIT THIS AREA -------------------###
-    lm1 <- lm(Price ~ Mileage, data=cardata)
+    lm1 <- logRegression()
     plot(lm1, which=1)
     
     

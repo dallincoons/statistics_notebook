@@ -29,16 +29,25 @@ This year, 2019, the 5 day average was 66.6. Using a simple linear regression, I
 
 ```{r, results='hide'}
 weather.lm <- lm(actual ~ average, data=weather)
-predict(weather.lm, data.frame(average=66.6), type="response")
+prediction <- predict(weather.lm, data.frame(average=66.6), type="response")
+prediction[1]
 ```
 
 ```{r}
+b <- predict(weather.lm, newdata= data.frame(average=66.6), interval ="prediction")
+b_1 <- b[1]
+b_2 <- b[2]
+b_3 <- b[3]
 
 
 ggplot(weather, aes(x = average, y = actual, label=year)) +
   geom_point(color="steelblue") +
   geom_point(aes(x=66.6, y=62.3, col="red"), show.legend = FALSE) +
   geom_abline(slope = weather.lm$coefficients[2], intercept=weather.lm$coefficients[1], color="gray") +
+  geom_hline(aes(yintercept = b_1)) +
+  geom_hline(aes(yintercept = b_2)) +
+  geom_hline(aes(yintercept = b_3)) +
+  geom_vline(aes(xintercept = prediction[1]), linetype = 'dotted') +
   labs(y = "Temperature Highs for April 29th", x="Prior 5 Day Tempature Average", title = "Predicted temperature for April 29, 2019 is 62.3 degrees (shown in red)") +
   theme_bw()
 
