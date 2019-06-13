@@ -3,7 +3,7 @@ set.seed(151)
 n <- 3000
 
 X1 <- runif(n, -10, 10)
-X2 <- sample(c('blue pill', 'red pill', 'mystery pill'), n, replace=TRUE)
+X2 <- sample(c('blue pill', 'red pill', 'mystery pill', 'green pill'), n, replace=TRUE)
 
 blue <- ifelse(X2 == 'blue pill', 1, 0)
 red <- ifelse(X2 == 'red pill', 1, 0)
@@ -26,14 +26,14 @@ beta10 <- -.18
 beta11 <- .009
 
 beta12 <- -2
-beta13 <- -.19
+beta13 <- -.9
 beta14 <- -.02
 beta15 <- 0
 
 beta16 <- -10
 beta17 <- -.1
 beta18 <- .1
-beta19 <- .0
+beta19 <- 0
 
 sigma <- 5
 
@@ -41,7 +41,7 @@ Y <-
      beta0 + beta1*X1 + beta2*X1^2 + beta3*X1^3 +
      beta4*blue + beta5*X1*blue + beta6*X1^2*blue + beta7*X1^3*blue +
      beta8*red + beta9*X1*red + beta10*X1^2*red + beta11*X1^3*red +
-     # beta12*green + beta13*X1*green + beta14*X1^2*green + beta15*X1^3*green +
+     beta12*green + beta13*X1*green + beta14*X1^2*green + beta15*X1^3*green +
      beta16*mystery + beta17*X1*mystery + beta18*X1^2*mystery + beta19*X1^3*mystery +
   rnorm(n, 0, sigma)
 
