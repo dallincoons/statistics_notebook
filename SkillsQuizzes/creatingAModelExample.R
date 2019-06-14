@@ -46,7 +46,7 @@ myData <- data.frame(Y = Y
                      X10 = rbinom(n, 30, .5)
                    )
 
-pairs(myData)
+# pairs(myData)
   
 mylm <- lm(Y ~ X1 + I(X1^2) + I(X1^3) + X2 + X1:X2 + I(X1^2):X2 + I(X1^3):X2, data=myData)
 summary(mylm)
