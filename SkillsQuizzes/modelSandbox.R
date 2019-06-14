@@ -71,7 +71,6 @@ myData <- data.frame(
 
 plot(Y ~ X5, data = myData)
 
-
 pairs(myData)
 
 mylm <- lm(Y ~ X5 + X2 + X5:X2 + I(X5^2) + I(X5^3) + I(X5^2):X2 + I(X5^3):X2, data = myData)
