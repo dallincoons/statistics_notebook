@@ -1,6 +1,6 @@
 set.seed(151)
 
-n <- 80
+n <- 95
 
 X5 <- runif(n, -10, 10)
 X2 <- sample(c('blue pill', 'red pill'), n, replace=TRUE)
@@ -13,6 +13,9 @@ X6 <- sample(c('steak', 'chicken', 'mystery meat'), n, replace=TRUE)
 X8 <- runif(n, -10, 10)
 
 red <- ifelse(X2 == 'red pill', 1, 0)
+
+X9 <- runif(n, -10, 10)
+low <- ifelse(X9 < 0, 1, 0)
 
 beta0 <- -5
 beta1 <- .6
@@ -40,7 +43,7 @@ Y <-
      beta0 + beta1*X5 + beta2*X5^2 + beta3*X5^3 +
      beta4*red + beta5*X5*red + beta6*X5^2*red + beta7*X5^3*red +
      beta8 + beta9*X5 +
-     beta12*X9 + beta13*X9*X5 +
+     beta12*low + beta13*low*X5 +
   rnorm(n, 0, sigma)
 
 myData <- data.frame(
@@ -77,10 +80,10 @@ summary(mylm)
 
 b <- coef(mylm)
 
-curve(beta0 + beta1*x + beta2*x^2 + beta3*x^3, add=TRUE, col=palette()[1], lwd=4)
-curve((beta0 + beta4) + (beta1 + beta5)*x + (beta2 + beta6)*x^2 + (beta3 + beta7)*x^3, add=TRUE, col=palette()[1], lwd=4)
-abline(beta8, beta9)
-abline((beta8 + beta12), (beta9 + beta13))
+# curve(beta0 + beta1*x + beta2*x^2 + beta3*x^3, add=TRUE, col=palette()[1], lwd=4)
+# curve((beta0 + beta4) + (beta1 + beta5)*x + (beta2 + beta6)*x^2 + (beta3 + beta7)*x^3, add=TRUE, col=palette()[1], lwd=4)
+# abline(beta8, beta9)
+# abline((beta8 + beta12), (beta9 + beta13))
 
 # lm1 <- lm(Y ~ X4, data = myData)
 # 
