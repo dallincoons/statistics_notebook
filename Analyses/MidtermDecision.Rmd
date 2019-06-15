@@ -10,6 +10,7 @@ output:
 library(tidyverse)
 library(ggplot2)
 library(car)
+library(pander)
 ```
 
 
@@ -29,14 +30,13 @@ ggplot(raw_grades, aes(x = Midterm, y = FinalExam)) +
   theme_bw()
 ```
 
-The simple regression gives us an r-squared value of `r summary(simple.lm)$r.squared` 
+The simple regression gives us an r-squared value of `r summary(simple.lm)$r.squared`. Let's see if we can do better.
 
-One thing that sticks out immediately are the outliers. There are a few scores at zero or near zero. I have to assume these were people who didn't take the test or didn't try or quit the test early. Neither one of those situations are relavant because I plan on taking the test and giving it some effort, and so I removed those from the data.
+One thing that sticks out immediately are the outliers. There are a few scores at zero or near zero. I have to assume these were people who didn't take the test or didn't try or quit the test early. Neither one of those situations are relevant because I plan on taking the test and actually giving it some effort, and so I removed those from the data. However I decided to keep the point at 0 at the bottom left because it seems to strengthen the regression.
 
 ```{r}
 grades <- raw_grades %>%
-  filter(FinalExam > 10) %>% 
-  filter(Midterm > 0)
+  slice(-c(1,5, 24))
 
 simple.lm <- lm(FinalExam ~ Midterm, data = grades)
 
@@ -48,60 +48,148 @@ ggplot(grades, aes(x = Midterm, y = FinalExam)) +
   theme_bw()
 ```
 
-It would also be good to take a peek at the residuals:
+The new simple regression gives us an r-squared value of `r summary(simple.lm)$r.squared`, which is already much improved.
 
-```{r}
-par(mfrow=c(1,2), mai=c(1,1,1,.2))
- plot(simple.lm, which=1:2)
-```
-
-Variance seems constant for the most part, but linearity and normality are a bit questionable. 
-
-The new simple regression gives us a worse r-squared value of `r summary(simple.lm)$r.squared`, and just looking at the plot we can see a group of points with high residuals at the bottom.
-
-At this point I'm thinking maybe there's an additional variable to help explain the variation in final exam scores, so I'll pull up a pairs plot.
-
-```{r}
-pairs(grades, panel = panel.smooth)
-```
-
-Because final exam is the Y variable, I want to look at the row that contains 'FinalExam'. Midterm shows the same plot we were looking at previously. Gender seems like a dud, so the only other potential I possibly see is SkillsQuizzesTotal. However that doesn't seem to be a lot of help either as it seems like most people finished the majority of skills quizzes, regardless of how well they ended up scoring on the exam.
-
-In the next plot I'll add a Loess curve to try and identify if any possible models can 'capture' the data better than a simple regression.
+I'm going to try a few things to try and determine if there's a better model. First I'm going to add a Loess curve:
 
 ```{r}
 ggplot(grades, aes(x = Midterm, y = FinalExam)) +
   geom_point() +
-  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") +
   geom_smooth(method="loess", span=0.8,
                se=FALSE, 
                method.args=list(degree=2)) +
   theme_bw()
 
+quadratic.lm <- lm(FinalExam ~ Midterm + I(Midterm^2), data = grades)
+cubic.lm <- lm(FinalExam ~ Midterm + I(Midterm^2) + I(Midterm^3), data = grades)
 ```
 
-It follows the line fairly well and I'm not seeing any obvious pattern.
+There's a little bit of a curve, possibly suggesting a quadratic or cubic model. The quadric model yields an r-squared of `r summary(quadratic.lm)$r.squared` and the cubic model `r summary(cubic.lm)$r.squared`, neither of which are enough of an improvement to justify the loss of interpretability that would result in using them.
 
-One last thing I want to try is box-cox to try and identify any possible transformations that can be applied.
+Let's check if there's a transformation on the simple linear model that would be helpful.
 
 ```{r}
-boxCox(simple.lm)
+boxCox(lm(FinalExam+1 ~ Midterm, data = grades))
 ```
 
-It doesn't narrow it down very well but it seems like a log transformation might be a reasonable thing to try.
+The confidence interval contains 1, indicating a transformation wouldn't be useful.
+
+The full output of the regression currently:
 
 ```{r}
-log.lm <- lm(log(FinalExam) ~ Midterm, data = grades)
+summary(simple.lm)
+
+
 ```
 
-Which yields a slightly worse r-squared, `r summary(log.lm)$r.squared`, so it looks like that's a bust.
+We could make a prediction using this model, but it's also good to keep in mind that predictions aren't just a precise point, it's a range of values. For the slope coefficient, the standard error (the estimate of the standard deviation) is .11. We can be 95% confident that the true slope is within 2 standard errors (1.96 really) of the estimated mean, which would be about .22 plus or minus the slope estimate of .93. That seems like a large range. Indeed if we look at the prediction, 81.82 is the predicted value, but the prediction interval goes from 56.2 to 107.46 (effectively 100).
 
-At this point I'm stuck, and I'm probably missing something, but it's late so I'll wait and see if anyone I critique does something brilliant I didn't think of.
+```{r}
+predict(simple.lm, newdata = data.frame(Midterm = 84), interval = "prediction")
+```
 
-My final model:
+I don't want to base my decision from that kind of prediction interval ao if possible I'd like to try and narrow it down.
+
+Something that bothers me about this regression is that there appears to be two distinct groups. There's a group on the lower right hand side, with final exam scores of around 50, and then there's a group of students above that around the 75-80 range. 
+
+These groups can also be seens using a residuals vs fitted plot
+
+```{r}
+plot(simple.lm, which = 1)
+```
+
+I'll pull up a pairs plot using the resdiuals and fitted values from the regression I ran earlier to see if there are any additional variables that can provide insight.
+
+```{r}
+pairs(cbind(R = simple.lm$residuals, Fit = simple.lm$fit, grades))
+```
+
+It doesn't look like there's much more information we can squeeze out of the Midterm variable, and I'm not seeing any clear pattens in SkillsQuizzesTotal or Gender.
+
+At first I wasn't sure if there was anywhere to go from here but I got the idea from another student in class that perhaps what explains the two groups is how well the students performed _relative to_ the midterm score. 
+
+I decided to add a new synthetic column to the dataset that accounts for differences in score by subtracting the Midterm score from the FinalExam score, and setting the value to 1 if they had a lower score, and a 0 if they scored equal to or higher than the Midterm.
+
+```{r}
+grades_difference <- grades %>% mutate(ScoredLower = ifelse(FinalExam - Midterm < 0, 1, 0))
+```
+
+Lets look at the pairs plot with this new column.
+
+```{r}
+pairs(grades_difference, panel = panel.smooth)
+```
+
+It looks like maybe there's something there. Lets try adding that variable to the regression.
+
+```{r}
+summary(lm(FinalExam ~ Midterm + ScoredLower + Midterm:ScoredLower, data = grades_difference))
+```
+
+It looks like we're onto something! Let's get rid of the insignifant coefficient, to see if that helps.
+
+```{r}
+two.lines <- lm(FinalExam ~ Midterm + Midterm:ScoredLower, data = grades_difference)
+b <- coef(two.lines)
+summary(two.lines)
+```
+
+That standard error looks much better, and now we should get tighter prediction intervals:
+
+```{r}
+predict(two.lines, newdata = data.frame(Midterm = 84, ScoredLower = 0), interval = "prediction")
+predict(two.lines, newdata = data.frame(Midterm = 84, ScoredLower = 1), interval = "prediction")
+```
+
+Bam! I love statistics.
+
+Let's see what the plot looks like.
+
+```{r}
+prediction_upper <- predict(two.lines, newdata = data.frame(Midterm = 84, ScoredLower = 0), interval = "prediction")
+prediction_lower <- predict(two.lines, newdata = data.frame(Midterm = 84, ScoredLower = 1), interval = "prediction")
+
+ggplot(grades, aes(x = Midterm, y = FinalExam)) +
+  geom_point() +
+  stat_function(fun = function(x) b[1] + b[2]*x, color="skyblue") +
+  stat_function(fun = function(x) b[1] + (b[2] + b[3])*x, color="firebrick") +
+  geom_rect(data = grades_difference, xmin = 83, xmax = 85, ymin = prediction_upper[2], ymax = prediction_upper[3], alpha = 0.03, fill = "skyblue") + 
+  geom_point(x = 84, y = prediction_upper[1], size = 2, color = "#eeeeee") +
+  geom_rect(data = grades_difference, xmin = 83, xmax = 85, ymin = prediction_lower[2], ymax = prediction_lower[3], alpha = 0.03, fill = "firebrick") + 
+  geom_point(x = 84, y = prediction_lower[1], size = 2, color = "#eeeeee") +
+  theme_bw()
+```
+
+and let's check linearity and constant variance
+
+```{r}
+plot(two.lines, which = 1)
+```
+
+It looks like there's constant variance as well as decent enough linearity.
+
+I feel good enough about this that I'll formally define the model:
 
 $$
-\underbrace{Y_i}_\text{Final Exam score} = \beta_0 +\underbrace{\beta_1X_i}_\text{Midterm score} +\epsilon_i
+\underbrace{Y_i}_{\text{Final exam score}} = \underbrace{\beta_0}_{\text{y-intercept baseline}} + 
+\underbrace{\beta_1}_{\text{slope baseline}}\underbrace{X_{1i}}_\text{Midterm score} +
+\underbrace{\beta_2}_\text{change in slope}
+\underbrace{X1iX2i}_\text{Midterm:LowerScore interaction} +
+\epsilon_i
 $$
-My prediction with a midterm score of 84 is that I'll get a 79.4 on the final, which seems reasonable so I'll keep my midterm score. The prediction interval is 51.84 to 100.
 
+## Decision
+
+Now I have to decide which regression line I'm going to use to predict my score. I could look at midterm exams from the past and compare them to how well I did on the final exams. It would be ideal to look at Math 325 because I would assume the caliber of the test given would be similar, but apparently there was no midterm in that class. It seems like historically my exams stay fairly on par from test to test, so I'll optimistically assume I'm in the upper group. 
+
+The formula for calculating the exams part of our grade is given in I-learn as
+$$
+  \text{Exam Score} = \text{0.7(Final Exam Score)} + \text{0.3(Midterm Score)}
+$$
+
+Assuming my Final Exam score is 89.8, my exam score will be 
+
+$$
+  \text{.7(89.8) + .3(84) = 88}
+$$
+88 is in in line will my predicted final exam score, so I will opt to <b>keep my midterm exam</b>.

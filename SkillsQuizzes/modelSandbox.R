@@ -30,6 +30,7 @@ beta13 <- -.9
 beta14 <- -.02
 beta15 <- 0
 
+<<<<<<< Updated upstream
 beta16 <- -10
 beta17 <- -.1
 beta18 <- .1
