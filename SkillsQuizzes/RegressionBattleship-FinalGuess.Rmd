@@ -1,0 +1,98 @@
+---
+title: "Regression Battleship - Final Guess"
+author: "Dallin Coons"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r}
+library(pander)
+# Read in the RBdata here:
+rbdata <- read.csv("./RegressionBattleshipData.csv", header=TRUE)
+```
+
+## The Model
+
+Your final guess at the "true model" for your instructor's data set:
+
+<!-- Enter your model in the math notation below. -->
+
+$$
+  Y_i = \beta_0 + ...YourGuess... + \epsilon_i
+$$
+
+## The lm(...) and Confidence Intervals
+
+<!-- Only enter your model in the statement above and in the "Edit this part" shown below. -->
+
+Provide your estimates of each model coefficient along with the R-squared of your model:
+
+```{r}
+
+## Input your lm(Y ~ ... ,data=rbdata)
+final.lm <- lm(Y ~ X1 + X4 + X9 + X10 + X4:X9 + X1:X7 + I(X4^2) + I(X4^3), data=rbdata) #replace the "1" with your model
+summary(final.lm)
+pander(summary(final.lm)$coefficents)
+```
+```{r}
+pairs(cbind(R = final.lm$residuals, Fit = final.lm$fit, rbdata))
+
+pairs(cbind(R=final.lm$res, fit=final.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X2))
+
+plot(Y ~ X1, data=rbdata)
+
+b <- coef(final.lm)
+
+curve(b[1] + b[2]*x, add=T)
+
+curve((b[1] + b[3]) + b[2]*x, add=T)
+
+curve((b[1] + b[4]) + b[2]*x, add=T)
+
+curve((b[1] +  b[4]) + b[5]*x^2 + b[6]*x^3, add=T)
+
+curve(b[1] + (b[2] + b[8])*x, add=T)
+
+curve(b[1] + (b[2] + b[7])*x, add=T)
+
+```
+
+```{r}
+pairs(rbdata)
+
+plot(Y ~ X4, data = rbdata)
+
+test.lm <- lm(Y ~ X1 + X1:X7:X5, data = rbdata)
+
+summary(test.lm)
+
+pairs(cbind(R = test.lm$residuals, Fit = test.lm$fit, rbdata))
+
+pairs(cbind(R=test.lm$res, fit=test.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X7))
+```
+
+
+
+## The Plot
+
+```{r}
+# Draw a picture of your guess at the model here:
+
+```
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 

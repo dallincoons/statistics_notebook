@@ -449,7 +449,7 @@ cubic.lm &lt;- lm(FinalExam ~ Midterm + I(Midterm^2) + I(Midterm^3), data = grad
 <pre class="r"><code>predict(simple.lm, newdata = data.frame(Midterm = 84), interval = &quot;prediction&quot;)</code></pre>
 <pre><code>##        fit      lwr      upr
 ## 1 80.82368 55.19007 106.4573</code></pre>
-<p>I don’t want to base my decision from that kind of prediction interval ao if possible I’d like to try and narrow it down.</p>
+<p>I don’t want to base my decision from that kind of prediction interval and if possible I’d like to try and narrow it down.</p>
 <p>Something that bothers me about this regression is that there appears to be two distinct groups. There’s a group on the lower right hand side, with final exam scores of around 50, and then there’s a group of students above that around the 75-80 range.</p>
 <p>These groups can also be seens using a residuals vs fitted plot</p>
 <pre class="r"><code>plot(simple.lm, which = 1)</code></pre>
