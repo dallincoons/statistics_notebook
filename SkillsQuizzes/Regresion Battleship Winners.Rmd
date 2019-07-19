@@ -1,0 +1,111 @@
+---
+title: "Regression Battleship Winners"
+author: "Dallin Coons"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+
+dat <- read_csv('../Data/DallinsData.csv')
+dat2 <- read_csv('../Data/DallinsData2.csv')
+```
+
+```{r}
+
+
+dat <- dat %>% mutate(myX =case_when((X8 < 0 & X8 > -13 & Y < -1) ~ 1,
+                      (X8 < -13 & Y > -1) ~ 1,
+                      (X8 > 0 & Y > -1) ~ 1),
+                      myX = factor(ifelse(is.na(myX), 0, 1)))
+
+dat2 <- dat2 %>% mutate(myX =case_when((X8 < 0 & X8 > -13 & Y < -1) ~ 1,
+                      (X8 < -13 & Y > -1) ~ 1,
+                      (X8 > 0 & Y > -1) ~ 1),
+                      myX = factor(ifelse(is.na(myX), 0, 1)))
+
+
+lmt <- lm(Y ~ X5 + X2 + X5:X2 + I(X5^2) + I(X5^3) + I(X5^2):X2 + I(X5^3):X2, data = dat)
+lm1 <- lm(Y ~ X5 + I(X5^2) + I(X5^3), data = dat)
+lm2 <-  lm(sqrt(Y + 13) ~ I(X1^2) + X2:X5 + X2:I(X5^3) + X3:I(X8^3) + X3:X10 + X3:I(X10^2) + X3:I(X10^3) + X6:I(sqrt(sqrt(X4))^3), data = dat) 
+lm3 <- lm(formula = Y ~ X8 + I(X8^2) + myX:X8 + myX:I(X8^2), data = dat)
+
+# summary(lm3)
+
+validate <- function(lm, data) {
+  yh1 <- predict(lm, newdata=data)
+  
+  ybar <- mean(data$Y)
+  
+  SSTO <- sum( (data$Y - ybar)^2 )
+  
+  SSE <- sum( (data$Y - yh1)^2 )
+  
+  rs1 <- 1 - SSE/SSTO
+  
+  n <- length(data$Y)
+  p <- length(coef(lmt))
+  
+  rsa <- 1 - (n-1)/(n-p)*SSE/SSTO
+  
+  return(rsa)
+}
+
+# summary(lmt)$adj.r.squared - validate(lmt, dat2)
+# summary(lm1)$adj.r.squared - validate(lm1, dat2)
+# summary(lm2)$adj.r.squared - validate(lm2, dat2)
+# summary(lm3)$adj.r.squared - validate(lm3, dat2)
+# 
+# print(validate(lmt, dat2))
+# print(validate(lm1, dat2))
+# print(validate(lm2, dat2))
+# print(validate(lm3, dat2))
+```
+
+## Obligatory Background Section
+
+Whew, this assignment was a doozy, though it was easily my favorite one! I actually feel like I undersand a thing or two about regression now and I wish we could have a 'round two' with regression battleship so I could try and create a model that's more fun than frustrating. Here's the plot of my model:
+
+```{r}
+plot(Y ~ X5, data = dat, col=factor(dat$X2))
+b <- coef(lmt)
+curve(b[1] +b[2]*x + b[4]*x^2 + b[5]*x^3, add=TRUE, col=palette()[1], lwd=2)
+curve((b[1] + b[3]) + (b[2] + b[6])*x + (b[4] + b[7])*x^2 + (b[5] + b[8])*x^3, add=TRUE, col=palette()[2], lwd=2)
+```
+### True model:
+$$ Y_i =  X_\text{5i} + X_\text{2i} + X_\text{5i}X_\text{2i} + X_\text{5i}^2 ++ X_\text{5i}^3 + X_\text{2i}X_\text{5i}^2 +  X_\text{2i}X_\text{5i}^3$$
+<!-- lm1 <- lm(Y ~ X5 + I(X5^2) + I(X5^3), data = dat) -->
+### Guess 1
+$$
+Y_i = X_\text{5i} + X_\text{5i}^2 + X_\text{5i}^3
+$$
+<!-- lm(sqrt(Y + 13) ~ I(X1^2) + X2:X5 + X2:I(X5^3) + X3:I(X8^3) + X3:X10 + X3:I(X10^2) + X3:I(X10^3) -->
+### Guess 2
+$$
+Y_i = X_\text{1i}^2 + X_\text{2i}X_\text{5i} + X_\text{2i}X_\text{5i}^3 + X_\text{3i}X_\text{8i}^3 + X_\text{3i}X_\text{10i} + X_\text{3i}X_\text{10i}^2 + X_\text{3i}X_\text{10i}^3
+$$
+### Saunders
+<!-- lm(formula = Y ~ X8 + I(X8^2) + myX:X8 + myX:I(X8^2), data = dat) -->
+$$
+Y_i = X_\text{8i} + X_\text{8i}^2 + X_\text{my}X_\text{8i} + X_\text{my}X_\text{8i}^2
+$$
+
+To determine the winner among the people who guessed at my model, I'm going to take a second sample from my population (aka generate a new dataset using the same true model but a different seed). After I have my second sample, I'm going to run an lm on each guessed model as well as the true model on the original dataset. Then with my second sample I'm going to predict where each point "should" be (at least according to the lm from the first dataset).
+
+Once I've calculated Y-hat, then I can see how well the new data fits the model according to how close it collectively gets to Y-hat, or the predicted values (usually we think of the model fitting the data, but this time we'll see how well the data fits the model). We'll do this by computing r-squared. Ideally we want to see that the r-squared value stays as consistent as possible, to show that we didn't overfit the model to one sample, but that we could reasonably reuse the model across many samples.
+
+| Model   | Adjusted $R^2$ Sample 1 | Adjusted $R^2$ Sample 2 |  Difference |
+|---------|-------|----------------|----------------|
+| True    | `r summary(lmt)$adj.r.squared` | `r validate(lmt, dat2)` | `r summary(lmt)$adj.r.squared - validate(lmt, dat2)`
+| Guess1  | `r summary(lm1)$adj.r.squared` | `r validate(lm1, dat2)`  | `r summary(lm1)$adj.r.squared - validate(lm1, dat2)`
+| Guess2 | `r summary(lm2)$adj.r.squared` | `r validate(lm2, dat2)` | `r summary(lm2)$adj.r.squared - validate(lm2, dat2)`
+| Saunders | `r summary(lm3)$adj.r.squared` | `r validate(lm3, dat2)` | `r summary(lm3)$adj.r.squared - validate(lm3, dat2)`
+
+## Winner
+
+This ones is hard because Guess1 technically had the least drop in r-squared, but it also started off really badly, so I don't know that being consistently bad merits any particular honors. The Saunders guess was on X8 instead of X5, but his model had the best r-squared to begin with, was certainly better than Guess1, and it didn't drop nearly as much as Guess2. So even though Brother Saunders' model is on the wrong variable, I'm going to declare him the winner!

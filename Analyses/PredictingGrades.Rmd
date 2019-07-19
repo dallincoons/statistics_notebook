@@ -1,0 +1,142 @@
+---
+title: "Predicting Grades"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(ResourceSelection)
+library(scorecard)
+library(pander)
+
+raw_grades <- read_csv('../Data/Math325Grades_Train.csv')
+raw_grades[is.na(raw_grades)] <- 0
+```
+
+## Question
+
+Can we predict whether a Math 325 student will get an A using the scores from assignments during the semester?
+
+## Model Selection
+
+After looking at a pairs plot and adding different variables to the model, it seemed to me that AnalysisTotal was a good place to start. That model has an AIC value of 66.879.
+
+I also suspected that FinalExam was going to play a large role in the final grade. Just adding the FinalExam to the model decreases AIC to 50.983, but I found that if I added a boolean column to the dataset to indicate whether the FinalExam score was "good" or not decreased AIC to 36.88. A "good" final exam value is above 8 for the purposes of my model, which I found mostly by trial and error.
+
+Additionally, I decided to check the number of missing assignments by counting how many zeros were found in the students grades. I suspected that zeros themselves will not only impact that grade directly, but is a further indication of potential knowledge gaps that result from not even attempting an assignment, and that the grade would be impacted indirectly. It didn't affect it as much as I was expecting, as there seems to be students who skip assignments yet are still able to obtain the coveted 'A' grade. Adding a column to the model that indicates whether a student missed more than 4 assignments bumped AIC down to 33.839.
+
+The selected model:
+
+$$
+  P(Y_i = 1|x_i) = \frac{e^{-76.8746+1.9686x_\text{1i} + 24.1343x_\text{2i} - 19.6663x_\text{3i}}}{1+e^{-76.876+1.9686x_\text{1i} + 24.1343x_\text{2i} - 19.6663x_\text{3i}}} = \pi_i
+$$
+<hr>
+$$
+   x_\text{1i} = \text{AnalysisTotal} \\
+   x_\text{2i} = \text{Good Final Exam Score} \\
+   x_\text{3i} = \text{More than 4 missing assignments}
+$$
+<hr>
+
+## Interpretation
+
+```{r, warning=FALSE}
+
+grades <- raw_grades %>% 
+  mutate(zero_count = rowSums(. == 0)) %>%
+  mutate(zeros_four_or_greater = zero_count > 4) %>%
+  mutate(no_project_1 = ifelse(Project1 == 0, 1, 0)) %>% 
+  mutate(good_final = FinalExam > 8) %>% 
+  mutate(zeros_four_or_greater = as.factor(zeros_four_or_greater))
+
+grades$Y <- grades$FinalGrade == 'A'
+
+grades.glm <- glm(Y ~ AnalysisTotal + good_final + zeros_four_or_greater, data = grades, family = binomial)
+
+
+b <- coef(grades.glm)
+
+```
+
+```{r}
+summary(grades.glm)
+```
+
+The "Good Final" and "Zeros Four Or Greater" attributes weren't significant so it doesn't make sense to interpret them, but they do lower the AIC value so I left them in the model.
+
+The effect of AnalysisTotal on the odds of getting and 'A' is $e^\text{1.9686}$ = 7.160645, meaning the odds of getting an 'A' increase 7 times for every point increase in the AnalysisTotal. The makes for a sharp increase in the odds as can be seen by the black line in the logistics plot.
+
+In the plot below students  are grouped according to their missing assignments, with the black group being those missing 4 or less assignments, and the red missing more than 4. You can see anyone missing more than 4 assignments has never recieved an A, at least within the working dataset.
+
+The black line below represents students who have 4 or less missing assignments, and have a weighted final exam value greater than 8. That's the only group that my model shows as having any chance of getting an A.
+
+The other groups who don't have a chance of the 'A' according tot he model are students with a lot of missing assignments and a bad final score (red), a lot of missing assignments and a good final score (green), and students with a low number of missing assignments, and a bad final score (orange).
+
+This indicates that the students with the greatest chance of getting the best grade possible are those who turn in assignments and get a good grade on the final exam.
+```{r}
+final_above_8 <- grades %>% 
+  filter(FinalExam > 8)
+
+plot(Y + as.numeric(zeros_four_or_greater)/100 ~ AnalysisTotal, data=final_above_8, pch=16, col=zeros_four_or_greater, ylab="Probability of getting an A", main="Having few missing assignments are important for getting an A", sub = "Of students who got above 8 on the final exam")
+
+four_or_greater = 0; GoodFinal = 1;
+curve(1/(exp(-b[1] - b[2]*x - b[3]*GoodFinal - b[4]*four_or_greater) + 1), add = TRUE, col="black")
+
+four_or_greater = 1; GoodFinal = 1;
+curve(1/(exp(-b[1] - b[2]*x - b[3]*GoodFinal - b[4]*four_or_greater) + 1) - .02, add = TRUE, col="red")
+
+legend("topleft", legend=c("4 or less missing assignments", "More than 4 missing assignments"), bty="n", lty=1, col=c("black","red"), cex=0.8)
+
+final_below_8 <- grades %>% 
+  filter(FinalExam < 8)
+
+plot(Y ~ AnalysisTotal, data=final_below_8, pch=16, col=zeros_four_or_greater, ylab="Probability of getting an A", main="Students with final exams below 8 have never gotten an A", sub = "Of students who got below 8 on the final exam")
+
+legend("topleft", pch = 19, legend=c("4 or less missing assignments", "More than 4 missing assignments"), bty="n", col=c("black","red"), cex=0.8)
+```
+
+## Goodness of fit
+
+The p-value from the goodness of fit test is .90 and the null hypothesis is that the model is a good fit. This leads me to not reject the null hypothesis and therfore conclude it is a good fit.
+
+```{r, warning=FALSE}
+hoslem.test(grades.glm$y, grades.glm$fitted.values)
+```
+
+
+```{r, include=FALSE}
+raw_grades_test <- read_csv('../Data/Math325Grades_Test.csv')
+raw_grades_test[is.na(raw_grades_test)] <- 0
+
+test_grades <- raw_grades_test %>%
+  mutate(zero_count = rowSums(. == 0)) %>%
+  mutate(zeros_four_or_greater = zero_count > 4) %>%
+  mutate(no_project_1 = ifelse(Project1 == 0, 1, 0)) %>%
+  mutate(good_final = FinalExam > 8) %>%
+  mutate(zeros_four_or_greater = as.factor(zeros_four_or_greater))
+
+test_grades$FinalGrade <- ifelse(predict(grades.glm, test_grades, type="response") > .5, "A", "Other")
+
+write.csv(test_grades, "Test.csv", row.names=FALSE)
+```
+
+## Validation
+
+To validate these results, I randomly subsetted my data to use as a test dataset, then run predictions using my model. Doing this with 36 records the model predicted with 100% accuracy whether the students got an A or not, so I'm satisfied.
+
+```{r, warning=FALSE}
+dt_list <- split_df(grades, ratio = 0.70, seed = 100)
+
+v.glm <- glm(Y ~ AnalysisTotal + good_final + zeros_four_or_greater, data = dt_list$test, family = binomial)
+
+probabilities <- predict(v.glm, dt_list$test, type="response")
+predictions <- ifelse(probabilities > .5, "A", "Other")
+
+pander(table(predictions, dt_list$test$FinalGrade))
+```
+
+
+

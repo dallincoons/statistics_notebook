@@ -1,0 +1,122 @@
+---
+title: "Math 425 Grades"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+## Start with Pairs Plot
+
+```{r, fig.height=20, fig.width=20}
+grades <- read.csv("Math425HistoricGrades.csv", header=TRUE)
+
+# Need a 0,1 y-variable for logistic regression:
+grades$Y <- grades$Final.Letter.Grade == "A"
+
+pairs(grades)
+```
+
+## Select Some Interesting Variables to Try
+
+```{r}
+plot(Y ~ Final.Exam.Score, data=grades)
+grades.glm <- glm(Y ~ Final.Exam.Score, data=grades, family=binomial)
+summary(grades.glm)
+b <- coef(grades.glm)
+curve(exp(b[1] + b[2]*x)/(1 + exp(b[1] + b[2]*x)), add=TRUE)
+
+curve(1/(exp(-b[1] - b[2]*x) + 1), add=TRUE)
+```
+
+```{r}
+plot(Y ~ Hard.Work.2, data=grades)
+grades.glm <- glm(Y ~ Hard.Work.2, data=grades, family=binomial)
+summary(grades.glm)
+b <- coef(grades.glm)
+curve(exp(b[1] + b[2]*x)/(1 + exp(b[1] + b[2]*x)), add=TRUE)
+
+curve(1/(exp(-b[1] - b[2]*x) + 1), add=TRUE)
+```
+
+```{r}
+grades.glm <- glm(Y ~ Final.Exam.Score * Hard.Work.2, data=grades, family=binomial)
+summary(grades.glm)
+```
+
+
+### Silly Model, Perfect Fit, but Useless for Interpretation
+
+```{r}
+plot(Y ~ grades$Calculated.Final.Grade.Numerator, data=grades)
+grades.glm <- glm(Y ~ grades$Calculated.Final.Grade.Numerator, data=grades, family=binomial)
+summary(grades.glm)
+b <- coef(grades.glm)
+curve(1/(exp(-b[1]-b[2]*x)+1), add=TRUE, n=1000)
+abline(v=93)
+```
+
+## Probably a better model out there, but this is a start
+
+Remember, lower AIC is better.
+
+```{r}
+# Favorite model so far...
+grades.glm <- glm(Y ~ Final.Exam.Score + Hard.Work.2, data=grades, family=binomial)
+summary(grades.glm)
+
+#Make Prediction
+# Suppose I had a predicted final exam score of 68
+# and a perferct Hard Work 2 score:
+predict(grades.glm, data.frame(Final.Exam.Score = .68*20, Hard.Work.2 = 3.3333), type="response")
+
+#Goodness-of-fit
+ResourceSelection::hoslem.test(grades.glm$y, grades.glm$fitted.values)
+
+
+```
+
+To interpret the model we look up each of the "Estimates" from the model, -25.733 is the estimate of $\beta_0$, 1.103 is the estimate of $\beta_1$, and 2.897 is the estimate of $\beta_2$ in the model
+
+$$
+  P(Y_i = 1 | X_{1i}, X_{2i}) = \frac{e^{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i}}}{1+e^{\beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i}}}
+$$
+
+To interpret, we use $e^-25.733 = $ `exp(-25.733)` $ = 6.67e-12 (essentially 0). This is the baseline odds, in other words, the odds of getting an A in Math 425 if you have a zero on your Final Exam and Hard Work 2. Yep. Impossible to get an A if you have zeros on both of those assignments.
+
+More importantly, we interpret the value of $e^1.103 = 3.013$ and $e^2.897 = 18.1197$ as showing that every 1 point increase in the weighted Final Exam Score (out of 20 possible) makes it three times more likely that you will get an A in Math 425. Further, every 1 point increase in the weighted Hard Work 2 score (3.33333 possible) makes it 18.1 times more likely that you will get an A in Math 425.
+
+## Validation
+
+First, divide the data into test and train sets.
+
+```{r}
+set.seed(5)
+keep <- sample(1:nrow(grades), round(0.6*nrow(grades)))
+train <- grades[keep, ]
+test <- grades[-keep, ]
+```
+
+Then, fit a glm with the train data, and get predicted probabilities for the test data.
+
+```{r message=FALSE, warning=FALSE}
+train.glm <- glm(Y ~ Final.Exam.Score + Hard.Work.2, data=train, family=binomial)
+predictedProbs <- predict(train.glm, newdata=test, type="response")
+```
+
+Now use predicted probabilities to decide if A or not.
+
+```{r}
+predictedGrades <- ifelse(predictedProbs > 0.5, "A", "not A")
+```
+
+Compare our predictions to the actual data. The "A" should match up with a 1, and the "not A" should match up with a 0.
+
+```{r}
+table(predictedGrades, test$Y)
+```
+
+We correctly classified 9 students as an A, but called 4 students an A that weren't an A. We correctly identify 14 students who did not have A's, as we said that they should not have an A, and we said 2 students should not get an A, "not A", but they actually did (TRUE) get an A. So, we have 14 + 9 correct predictions and 4 + 2 incorrect predictions out of 14+9+4+2 total. This gives us a (14 + 9)/(14+9+4+2) = 0.79 accuracy on what is called the "percent correctly classified".
+
+
+

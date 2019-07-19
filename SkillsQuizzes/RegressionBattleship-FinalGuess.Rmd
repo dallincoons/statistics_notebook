@@ -12,7 +12,7 @@ output:
 ```{r}
 library(pander)
 # Read in the RBdata here:
-rbdata <- read.csv("./RegressionBattleshipData.csv", header=TRUE)
+rbdata <- read.csv("../Data/SaundersS19_RBdata.csv", header=TRUE)
 ```
 
 ## The Model
@@ -22,10 +22,12 @@ Your final guess at the "true model" for your instructor's data set:
 <!-- Enter your model in the math notation below. -->
 
 $$
-  Y_i = \beta_0 + ...YourGuess... + \epsilon_i
+  Y_i = \beta_0 + \beta_1 X_\text{6i} + \beta_2X_\text{6i}^2 + \beta_3X_\text{4i} + \beta_4X_\text{9i} + \beta_5X_\text{6i}X_\text{4i} + \beta_6X_\text{6i}X_\text{9i} + \beta_7X_\text{6i}^2X_\text{9i} + \beta_8X_\text{6i}X_\text{4i}X_\text{9i}X_\text{5i} + \beta_9X_\text{6i}^2X_\text{4i}X_\text{9i}X_\text{5i} + \epsilon_i
 $$
 
 ## The lm(...) and Confidence Intervals
+
+<!-- pairs(rbdata) -->
 
 <!-- Only enter your model in the statement above and in the "Edit this part" shown below. -->
 
@@ -33,46 +35,37 @@ Provide your estimates of each model coefficient along with the R-squared of you
 
 ```{r}
 
+final.lm <- lm(Y ~ X6 + I(X6^2) + X4 + X6:X4 + X9 + X9:X6 + X9:I(X6^2) + X6:X9 + X4:X9:X5:X6 + X4:X9:X5:I(X6^2), data = rbdata)
+
 ## Input your lm(Y ~ ... ,data=rbdata)
-final.lm <- lm(Y ~ X1 + X4 + X9 + X10 + X4:X9 + X1:X7 + I(X4^2) + I(X4^3), data=rbdata) #replace the "1" with your model
-summary(final.lm)
-pander(summary(final.lm)$coefficents)
+# final.lm <- lm(Y ~ X1 + X4 + X9 + X10 + X1:X7 + I(X4^2) + I(X4^3), data=rbdata) #replace the "1" with your model
+
+pander(summary(final.lm)$coefficients)
+
 ```
+<hr>
+R-squared: <span style="font-weight:900; font-size:1.5em"><b> `r summary(final.lm)$r.squared`</b></span>
+<hr>
 ```{r}
-pairs(cbind(R = final.lm$residuals, Fit = final.lm$fit, rbdata))
-
-pairs(cbind(R=final.lm$res, fit=final.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X2))
-
-plot(Y ~ X1, data=rbdata)
-
-b <- coef(final.lm)
-
-curve(b[1] + b[2]*x, add=T)
-
-curve((b[1] + b[3]) + b[2]*x, add=T)
-
-curve((b[1] + b[4]) + b[2]*x, add=T)
-
-curve((b[1] +  b[4]) + b[5]*x^2 + b[6]*x^3, add=T)
-
-curve(b[1] + (b[2] + b[8])*x, add=T)
-
-curve(b[1] + (b[2] + b[7])*x, add=T)
-
+# pairs(cbind(R = final.lm$residuals, Fit = final.lm$fit, rbdata))
+# 
+# pairs(cbind(R=final.lm$res, fit=final.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X9))
+# 
+# pairs(cbind(R=final.lm$res, fit=final.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X5))
 ```
 
 ```{r}
-pairs(rbdata)
-
-plot(Y ~ X4, data = rbdata)
-
-test.lm <- lm(Y ~ X1 + X1:X7:X5, data = rbdata)
-
-summary(test.lm)
-
-pairs(cbind(R = test.lm$residuals, Fit = test.lm$fit, rbdata))
-
-pairs(cbind(R=test.lm$res, fit=test.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X7))
+pairs(rbdata, col=factor(rbdata$X5))
+# 
+# plot(Y ~ X4, data = rbdata)
+# 
+# test.lm <- lm(Y ~ X1 + X1:X7:X5, data = rbdata)
+# 
+# summary(test.lm)
+# 
+# pairs(cbind(R = test.lm$residuals, Fit = test.lm$fit, rbdata))
+# 
+# pairs(cbind(R=test.lm$res, fit=test.lm$fit, rbdata), pch=16, cex=1, panel=panel.smooth, col.smooth="skyblue4", col=factor(rbdata$X7))
 ```
 
 
@@ -80,7 +73,17 @@ pairs(cbind(R=test.lm$res, fit=test.lm$fit, rbdata), pch=16, cex=1, panel=panel.
 ## The Plot
 
 ```{r}
-# Draw a picture of your guess at the model here:
+plot(Y ~ X6, data=rbdata, col=interaction(rbdata$X4,rbdata$X9), pch=16, cex=2)
+
+b <- coef(final.lm)
+
+curve(b[1] + b[2]*x + b[3]*x^2, add=T)
+
+curve((b[1] + b[5]) + (b[2] + b[7])*x + (b[3] + b[8])*x^2, add = T, col = "green")
+
+curve((b[1] + b[4]) + (b[2] + b[6])*x + (b[3])*x^2, add = T, col="red")
+
+curve((b[5] + b[6] + b[7]) + (b[9] + b[7] + b[6] + b[2])*x + (b[3] + b[8] + b[10])*x^2, add = T, col = "blue")
 
 ```
 
