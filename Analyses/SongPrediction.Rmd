@@ -1,0 +1,104 @@
+---
+title: "Song Prediction"
+output:
+ html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(scorecard)
+library(pander)
+
+songs <- read_csv('./../Data/song_attributes.csv')
+songs$Y <- ifelse(songs$Like == 'Y', 1, 0)
+```
+
+```{r}
+songs$danceability_x <- songs$danceability > .5
+songs$energy_x <- songs$energy > .5
+```
+
+
+
+## {.tabset}
+
+### Background
+
+
+
+### Conclusions
+
+test3
+
+### Model Selection and Visualization
+
+I initially tried all the variables I thought might be interesting, with the intention of starting with the variable with the lowest AIC value, which led me to `popularity` as a starting point which provided an AIC of 135.51.
+
+Danceability only decreased it to 131.73, but after experimenting with a new binary column where 0 represents "below .5" and 1 represent "above .5", AIC was knocked down to 121.63. Adding Instrumentalness decreased it to 108.77. I tried splitting instrumentalness similar to danceability but couldn't find a value that worked as a good split point and would help the moodel.
+
+Finally I found that if I split `energy` by values above or below .5, AIC dropped to 98.537. I couldn't find attributes that dropped it significantly and the model is already quite complex, so I stopped there. 
+
+```{r}
+lm <- glm(Y ~ popularity + instrumentalness + danceability_x + energy_x, data = songs, family = binomial)
+
+b <- coef(lm)
+
+plot(Y ~ popularity, data = songs, pch=16, main="Energetic but not danceable songs increase likeability", sub="Instrumentalness = .2")
+
+instrumentalness = 0.2; danceable = 1; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*x - b[3]*instrumentalness - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="black")
+
+instrumentalness = 0.2; danceable = 1; energetic = 1;
+curve(1/(exp(-b[1] - b[2]*x - b[3]*instrumentalness - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="red")
+
+instrumentalness = 0.2; danceable = 0; energetic = 1;
+curve(1/(exp(-b[1] - b[2]*x - b[3]*instrumentalness - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="green")
+
+legend("center", legend=c("Danceable, Not Energetic", "Danceable, Energetic, Instrumentalness = .02", "Not Danceable, Energetic"), bty="n", lty=1, col=c("black", "red", "green"), cex=0.8)
+
+plot(Y ~ instrumentalness, data = songs, pch=16)
+
+popularity = 40; instrumentalness = 0.2; danceable = 1; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*x - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="black")
+
+popularity = 80; instrumentalness = 0.2; danceable = 1; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*x - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="red")
+
+popularity = 10; instrumentalness = 0.2; danceable = 1; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*x - b[4]*danceable - b[5]*energetic) + 1), add = TRUE, col="green")
+
+plot(Y ~ danceability, data = songs, pch=16)
+
+popularity = 90; instrumentalness = 0.8; danceable = .2; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*x - b[4]*instrumentalness - b[5]*energetic) + 1), add = TRUE, col="black")
+
+plot(Y ~ energy, data = songs, pch=16)
+
+popularity = 40; instrumentalness = .1; danceable = 0; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*danceable - b[4]*instrumentalness - b[5]*x) + 1), add = TRUE, col="black")
+
+popularity = 40; instrumentalness = .4; danceable = 0; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*danceable - b[4]*instrumentalness - b[5]*x) + 1), add = TRUE, col="red")
+
+popularity = 40; instrumentalness = .8; danceable = 0; energetic = 0;
+curve(1/(exp(-b[1] - b[2]*popularity - b[3]*danceable - b[4]*instrumentalness - b[5]*x) + 1), add = TRUE, col="skyblue")
+```
+
+
+### Validation
+
+```{r, warning=FALSE}
+dt_list <- split_df(songs, ratio = 0.70, seed = 62)
+
+v.glm <- glm(Y ~ popularity + instrumentalness + danceability_x + energy_x, data = dt_list$test, family = binomial)
+
+probabilities <- predict(v.glm, dt_list$test, type="response")
+predictions <- ifelse(probabilities > .5, "Y", "N")
+
+pander(table(predictions, dt_list$test$Like))
+
+```
+
+Accuracy: <b>`r (24+20)/50`</b>
